@@ -20,8 +20,9 @@ class Salvagebid:
         """
         self.script_dir = os.path.dirname(os.path.abspath(__file__))
         os.chdir(self.script_dir)
+
         cwd = os.path.abspath(os.getcwd())
-        self.folder_path = os.path.join(cwd, 'salvagebid', datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
+        self.folder_path = os.path.join(cwd, 'Output_Folder', datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
 
         self.writer = None
         self.headers = {

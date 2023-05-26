@@ -13,7 +13,8 @@ import requests
 
 class Abetter:
     """
-    Created a Salvagebid class to scrape data from its website and stored it into CSV
+    Created a Salvagebid class to scrape data from its
+    website and stored it into CSV
     """
 
     def __init__(self):
@@ -45,7 +46,8 @@ class Abetter:
         }
         self.writer = None
         cwd = os.path.abspath(os.getcwd())
-        self.folder_name = os.path.join(cwd, 'abetter', datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
+        self.folder_name = os.path.join(cwd, 'Output_folder',
+                            datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
 
     def create_empty_csv(self):
         """
@@ -249,7 +251,8 @@ class Abetter:
         except:
             sale_time = ""
         try:
-            vehicle_type = content.find_all("div", class_="details-item__text details-item__text--line")[6].get_text().strip()
+            vehicle_type = content.find_all("div", class_="details-item__text details-item__text--line"
+                                            )[6].get_text().strip()
         except:
             vehicle_type = ""
         time_zone = ""
@@ -258,7 +261,8 @@ class Abetter:
         model_details = ""
         damage_description = ""
         try:
-            secondary_damage = content.find_all("div", class_="details-item__text details-item__text--line")[3].get_text().strip()
+            secondary_damage = content.find_all("div", class_="details-item__text details-item__text--line"
+                                                )[3].get_text().strip()
         except:
             secondary_damage = ""
         location_zip5 = ""
@@ -305,11 +309,13 @@ class Abetter:
         high_bid_non_vix_sealed_vix = ""
         special_note = ""
         try:
-            location_city = content.find("div", class_="details-item__text--blue details-item__text-bold").get_text().strip().split(",")[0]
+            location_city = content.find("div", class_="details-item__text--blue details-item__text-bold"
+                                         ).get_text().strip().split(",")[0]
         except:
             location_city = ""
         try:
-            location_state = content.find("div", class_="details-item__text--blue details-item__text-bold").get_text().strip().split(",")[1].strip()
+            location_state = content.find("div", class_="details-item__text--blue details-item__text-bold"
+                                          ).get_text().strip().split(",")[1].strip()
         except:
             location_state = ""
         source = ""
