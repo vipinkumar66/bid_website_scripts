@@ -60,7 +60,7 @@ class Salvage:
         Creating a output folder to write the content
         """
         current_folder_path = os.getcwd()
-        output_folder_name = datetime.datetime.now().strftime('%H_%M_%S')
+        output_folder_name = datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
         absolute_path = os.path.abspath(os.path.join(current_folder_path,
                             f"salvage_reseller_{output_folder_name}"))
         self.current_folder_path = absolute_path

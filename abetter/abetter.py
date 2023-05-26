@@ -45,7 +45,7 @@ class Abetter:
         }
         self.writer = None
         cwd = os.path.abspath(os.getcwd())
-        self.folder_name = os.path.join(cwd, 'abetter', datetime.now().strftime('%H_%M_%S'))
+        self.folder_name = os.path.join(cwd, 'abetter', datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
 
     def create_empty_csv(self):
         """
