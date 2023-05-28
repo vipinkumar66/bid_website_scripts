@@ -98,7 +98,7 @@ class Autoauctionmall:
         vin = others.get('vin').get('value', '')
         yard_number = ''
         yard_name = ''
-        item = ''
+        item = car.get('name', '')
         Iot_number = ''
         body_style = ''
         vehical_type = ''
