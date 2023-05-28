@@ -97,8 +97,8 @@ class Salvage:
             upd_page1 += 100
             headers['Referer'] = f'https://www.salvagereseller.com/cars-for-sale/type/automobiles/page/{upd_page1}'
             self.page2 += 100
-            # if self.count >= 30:
-            #     break
+            if self.count >= 3000:
+                break
         print(len(self.to_url))
 
     def cars_info(self):
