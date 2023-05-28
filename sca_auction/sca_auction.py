@@ -3,6 +3,7 @@ These modules are used to scrape the cars information from a website and saves i
 
 """
 # Install httpx and selectolax
+import os
 from typing import List
 from urllib.parse import urljoin
 import time
@@ -15,6 +16,12 @@ from selectolax.parser import HTMLParser
 import pandas as pd
 from bs4 import BeautifulSoup
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(script_dir)
+
+cwd = os.path.abspath(os.getcwd())
+folder_name = os.path.join(cwd, 'Output_folder',
+                    datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
 
 @dataclass
 class Product:
@@ -380,9 +387,7 @@ def write_to_csv(products):
             data.append(row)
     data_frame = pd.DataFrame(data)
     # Get current date and time
-    now = datetime.datetime.now()
-    timestamp_str = now.strftime("%Y-%m-%d_%I-%M-%S")
-    filename = f"SCA_Auction_{timestamp_str}.csv"
+    filename = f"{folder_name}/sca_auction_csv.csv"
     data_frame.to_csv(filename, index=False)
     #data_frame.to_csv("sca_auction_output11.csv", index=False)
 
