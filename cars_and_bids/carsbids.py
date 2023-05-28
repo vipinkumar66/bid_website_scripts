@@ -12,16 +12,18 @@ from constants import headers, folder_name
 class CarsAndBids:
 
     def __init__(self):
-
+        """
+        Initalizer function
+        """
         self.driver = None
         self.warning = 0
         self.url = f"https://carsandbids.com/"
         self.car_urls = []
-        self.script_dir = os.path.dirname(os.path.abspath(__file__))
-        os.chdir(self.script_dir)
 
     def create_empty_csv(self):
-
+        """
+        Create the output folder and empty csv into it
+        """
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
         with open(f"{folder_name}/carsandbids.csv", mode='w',
@@ -30,13 +32,20 @@ class CarsAndBids:
             self.writer.writerow(headers)
 
     def create_driver(self):
+        """
+        Setup chrome driver to scrap the data
+        """
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--headless')  # Run in headless mode
+        chrome_options.add_argument('--disable-gpu')  # Disable GPU acceleration (optional)
 
         max_attempts = 3
         attempt = 1
 
         while attempt <= max_attempts:
             try:
-                self.driver = webdriver.Chrome(ChromeDriverManager().install())
+                self.driver = webdriver.Chrome(ChromeDriverManager().install(),
+                                               options=chrome_options)
                 break  # If no exception occurs, break out of the loop
             except selenium.common.exceptions.SessionNotCreatedException:
                 attempt += 1
@@ -73,8 +82,11 @@ class CarsAndBids:
             print("No unorganized list with class 'auctions-list' found.")
 
     def get_vehicle_data(self):
-
-        for url in self.car_urls:
+        """
+        To get  all the data related to bid vehicle
+        """
+        for url in self.car_urls[:5]:
+            print(f"Scraping info from: {url}")
 
             if self.warning == 20:
                 self.driver.delete_all_cookies()
@@ -114,7 +126,7 @@ class CarsAndBids:
 
                 timestamp = datetime.now()
 
-                id_for_veh = yard_number = yard_name = sale_date = day_of_week = sale_time =\
+                yard_number = yard_name = sale_date = day_of_week = sale_time =\
                 lot = vehicle_type = production_year = model_details = damage_description =\
                 secondary_damage = sale_title_state = sale_title_type = has_keys =\
                 lot_cond_code = odometer =odometer_brand = est_retail_value = repair_cost =\
@@ -123,7 +135,7 @@ class CarsAndBids:
                 rentals = copart_select = source = time_zone = ""
 
 
-                data = [id_for_veh, yard_number, yard_name, sale_date, day_of_week, sale_time, time_zone, item, lot,
+                data = [yard_number, yard_name, sale_date, day_of_week, sale_time, time_zone, item, lot,
                     vehicle_type, production_year, make, model, model_details, body_style, color, damage_description,
                     secondary_damage, sale_title_state, sale_title_type, has_keys, lot_cond_code, vin, odometer,
                     odometer_brand, est_retail_value, repair_cost, engine, drive, transmission,
@@ -137,6 +149,8 @@ class CarsAndBids:
                     writer.writerow(data)
 
                 self.warning +=1
+        print("ALL URLS ARE SCRAPPED")
+        self.driver.quit()
 
     def vehicle_details(self, table_data):
         """
@@ -196,7 +210,10 @@ class CarsAndBids:
         return (location_zip4, location_city, location_state, location_country, location_zip5)
 
     def image_details(self, soup_text):
-
+        """
+        Get the thumbnail image link and all other images
+        link
+        """
         # Find image thumbnail
         div_tag = soup_text.find('div', class_=("preload-wrap", "main loaded"))
         img_tag = div_tag.find('img')

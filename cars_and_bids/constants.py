@@ -1,11 +1,14 @@
 import os
 from datetime import datetime
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(script_dir)
+
 cwd = os.path.abspath(os.getcwd())
 folder_name = os.path.join(cwd, 'Output_folder',
                             datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
 
-headers = ['id', 'yard_number', 'yard_name', 'sale_date', 'day_of_week', 'sale_time', 'time_zone', 'item',
+headers = ['yard_number', 'yard_name', 'sale_date', 'day_of_week', 'sale_time', 'time_zone', 'item',
             'lot_number', 'vehicle_type', 'year', 'make', 'model_group', 'model_detail', 'body_style', 'color',
             'damage_description', 'secondary_damage', 'sale_title_state', 'sale_title_type', 'has_keys',
             'lot_cond_code', 'vin', 'odometer', 'odometer_brand', 'est_retail_value', 'repair_cost', 'engine',
