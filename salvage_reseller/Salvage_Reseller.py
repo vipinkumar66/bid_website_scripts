@@ -116,11 +116,12 @@ class Salvage:
                     network = True
                     # Process the response and break the loop if successful
                     break
-                except requests.exceptions.Timeout:
+                except (requests.exceptions.Timeout, requests.exceptions.ReadTimeout):
                     print(f"Timeout occurred. Retrying request ({attempt}/{max_attempt})...")
                     attempt += 1
                     network = False
-                    time.sleep(60)  # Wait for 60 seconds before retrying
+                    time.sleep(60)
+                    # Wait for 60 seconds before retrying
 
             if network:
                 soup1 = BeautifulSoup(resp.content, 'html.parser')
