@@ -100,7 +100,7 @@ class CapitalAutoAuction:
         data_count = response.json()['countSelect']
         pages = math.ceil(data_count/100)
 
-        for page in range(1, pages+1):
+        for page in range(1, 2):
             link_response = requests.get('https://www.capitalautoauction.com/inventory', params={
                 'per_page': '100',
                 'sort': 'make',
@@ -165,6 +165,7 @@ class CapitalAutoAuction:
             image_url = image['src']
         else:
             image_url = ""
+        print(f"image: {image_url}")
 
         current_bid = soup.find("div", class_="vehicle__bid")
         if current_bid:
@@ -172,45 +173,48 @@ class CapitalAutoAuction:
         else:
             current_bid = ""
 
-        json_to_add = {"Title": title , "VIN": "", "Stock#": "", "Year": "",
-                        "Type": "", "Drive": "", "Engine": "", "Transmission": "",
-                        "Ext color": "", "Make": "", "Model": "", "Trim": "",
-                        "Odo": "", "Location": "", "Live Start": "","currency_code":"",
-                        "ENGINE": "", "lot_cond_code":"", "fuel_type":"","BODY": "",
-                        "KEYS": "","image_thumbnail":image_url,"CYLINDER": "",
-                        "yard_number":"", "yard_name":"","day_of_week":"", "sale_time":"",
-                        "time_zone":"","model_details":"", "damage_description":"",
-                        "secondary_damage":"", "sale_title_state":"", "sale_title_type":"",
-                        "odometer_brand":"", "est_retail_value":"", "repair_cost":"",
-                        "runs_drives":"", "sale_status":"",
-                        "high_bid_non_vix_sealed_vix":"", "special_note":"",
-                        "location_state":"", "location_zip5":"", "location_zip4":"",
-                        "location_country":"","create_date_time":"", "grid_row":"",
-                        "current_bid":current_bid, "buy_it_now_price":"", "images":"", "trim":"",
-                        "last_updated_time":"", "rentals":"", "copart_select":"", "source":"",
-                        "Time_Stamp": str(datetime.datetime.now())}
+        try:
+            json_to_add = {"Title": title , "VIN": "", "Stock#": "", "Year": "",
+                            "Type": "", "Drive": "", "Engine": "", "Transmission": "",
+                            "Ext color": "", "Make": "", "Model": "", "Trim": "",
+                            "Odo": "", "Location": "", "Live Start": "","currency_code":"",
+                            "ENGINE": "", "lot_cond_code":"", "fuel_type":"","BODY": "",
+                            "KEYS": "","image_thumbnail":image_url,"CYLINDER": "",
+                            "yard_number":"", "yard_name":"","day_of_week":"", "sale_time":"",
+                            "time_zone":"","model_details":"", "damage_description":"",
+                            "secondary_damage":"", "sale_title_state":"", "sale_title_type":"",
+                            "odometer_brand":"", "est_retail_value":"", "repair_cost":"",
+                            "runs_drives":"", "sale_status":"",
+                            "high_bid_non_vix_sealed_vix":"", "special_note":"",
+                            "location_state":"", "location_zip5":"", "location_zip4":"",
+                            "location_country":"","create_date_time":"", "grid_row":"",
+                            "current_bid":current_bid, "buy_it_now_price":"", "images":"", "trim":"",
+                            "last_updated_time":"", "rentals":"", "copart_select":"", "source":"",
+                            "Time_Stamp": str(datetime.datetime.now())}
 
-        # main parameters
-        option_labels = [i.select('span.options__label')[0].text.strip().replace(':', '') for i in
-                         soup.select('li.options__item') if i.select('span.options__label') != []]
-        options_value = [i.select('span.options__value')[0].text.strip() for i in
-                         soup.select('li.options__item') if i.select('span.options__label') != []]
-        for counter in range(len(option_labels)):
-            if option_labels[counter] in self.master_json:
-                json_to_add[option_labels[counter]] += options_value[counter]
+            # main parameters
+            option_labels = [i.select('span.options__label')[0].text.strip().replace(':', '') for i in
+                            soup.select('li.options__item') if i.select('span.options__label') != []]
+            options_value = [i.select('span.options__value')[0].text.strip() for i in
+                            soup.select('li.options__item') if i.select('span.options__label') != []]
+            for counter in range(len(option_labels)):
+                if option_labels[counter] in self.master_json:
+                    json_to_add[option_labels[counter]] += options_value[counter]
 
-        # condition report parameters
-        condition_reports = [[j.text for j in i.select('span.options__value--unbold')] for i in
-                             soup.select('li.options__item') if
-                             i.select('span.options__value--unbold') != []]
-        condition_reports = [element for innerList in condition_reports for element in innerList]
+            # condition report parameters
+            condition_reports = [[j.text for j in i.select('span.options__value--unbold')] for i in
+                                soup.select('li.options__item') if
+                                i.select('span.options__value--unbold') != []]
+            condition_reports = [element for innerList in condition_reports for element in innerList]
 
-        cr_labels = [i.split(':')[0].strip() for i in condition_reports if ':' in i]
-        cr_values = [i.split(':')[1].strip() for i in condition_reports if ':' in i]
-        for cr_counter in range(len(cr_labels)):
-            if cr_labels[cr_counter] in self.master_json:
-                json_to_add[cr_labels[cr_counter]] += cr_values[cr_counter]
-                print(json_to_add)
+            cr_labels = [i.split(':')[0].strip() for i in condition_reports if ':' in i]
+            cr_values = [i.split(':')[1].strip() for i in condition_reports if ':' in i]
+            for cr_counter in range(len(cr_labels)):
+                if cr_labels[cr_counter] in self.master_json:
+                    json_to_add[cr_labels[cr_counter]] += cr_values[cr_counter]
+                    print(json_to_add)
+        except Exception:
+            print(Exception)
 
         # Appending the data into main data (master_json)
         for data in json_to_add:
@@ -221,17 +225,15 @@ class CapitalAutoAuction:
     def scrap_data(self):
         """Scraps the entire data from website using multithreading"""
         with ThreadPoolExecutor() as executor:
-            executor.map(self.get_data_from_link, self.get_links())
+            executor.map(self.get_data_from_link, self.all_links)
         dataframe = pd.DataFrame(self.master_json)
         dataframe.to_csv(f'{self.current_folder_path}/Capital Auto Auction Data.csv',
                          index=False)
 
 
 if __name__ == "__main__":
-    try:
-        caa_obj = CapitalAutoAuction()
-        caa_obj.scrap_data()
-    except Exception:
-        print(Exception)
+    caa_obj = CapitalAutoAuction()
+    caa_obj.get_links()
+    caa_obj.scrap_data()
 
 # Took 251 seconds (4.18 mins) to execute
