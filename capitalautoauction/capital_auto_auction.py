@@ -25,14 +25,20 @@ class CapitalAutoAuction:
         self.master_json = {"Title": [] , "VIN": [], "Stock#": [], "Year": [],
                             "Type": [], "Drive": [], "Engine": [], "Transmission": [],
                             "Ext color": [], "Make": [], "Model": [], "Trim": [],
-                            "Odo": [], "Location": [], "Live Start": [],
-                            "ENGINE": [],
-                            "BODY": [], "KEYS": [],
-                            "CYLINDER": [],
-                            "Time Stamp": [], "yard_number":[], "yard_name":[],
-                            "day_of_week":[], "sale_time":[], "time_zone":[],
-                            "model_details":[], "damage_description":[],
-                 "secondary_damage":[], "sale_title_state":[], "sale_title_type":[]}
+                            "Odo": [], "Location": [], "Live Start": [],"currency_code":[],
+                            "ENGINE": [], "lot_cond_code":[], "fuel_type":[],"BODY": [],
+                            "KEYS": [],"image_thumbnail":[],"CYLINDER": [],
+                            "yard_number":[], "yard_name":[],"day_of_week":[], "sale_time":[],
+                            "time_zone":[],"model_details":[], "damage_description":[],
+                            "secondary_damage":[], "sale_title_state":[], "sale_title_type":[],
+                            "odometer_brand":[], "est_retail_value":[], "repair_cost":[],
+                            "runs_drives":[], "sale_status":[],
+                            "high_bid_non_vix_sealed_vix":[], "special_note":[],
+                            "location_state":[], "location_zip5":[], "location_zip4":[],
+                            "location_country":[],"create_date_time":[], "grid_row":[],
+                            "current_bid":[], "buy_it_now_price":[], "images":[], "trim":[],
+                            "last_updated_time":[], "rentals":[], "copart_select":[], "source":[],
+                            "Time_Stamp": []}
 
     @staticmethod
     def execution_time(function):
@@ -153,32 +159,36 @@ class CapitalAutoAuction:
         title = ' '.join([i for i in soup.select('h1.vehicle__title')[0].text.strip()
                          .replace('\n', '').split(' ') if i != ""])
 
-        json_to_add = {"Title": title,  "VIN": "", "Stock#": "", "Year": "",
-                       "Type": "", "Drive": "", "Engine": "", "Transmission": "", "Ext color": "",
-                       "Make": "", "Model": "", "Trim": "", "Odo": "", "Location": "",
-                       "Live Start": "", "Vehicle Options": "", "SUV": "", "INTERIOR MIRROR": "",
-                       "DRIVER F DOOR": "", "CAR": "", "PAINT": "", "ROCKER PANEL": "",
-                       "ENGINE": "", "SUSPENSION": "", "WIND SHIELD": "", "ALTERNATOR": "",
-                       "ALL SEATS": "", "TIRES": "", "VSA": "", "RIGHT FENDER": "", "BUS": "",
-                       "BODY": "", "PASSENGER R SEAT": "", "TIMING": "", "DRIVER F WINDOW": "",
-                       "AIRBAG": "", "PASSENGER R WINDOW": "", "PASSENGER F DOOR": "",
-                       "LEFT QTR PANEL": "", "MOTORCYCLE": "", "LEFT FENDER": "", "KEYS": "",
-                       "TRUNK LID": "", "BROKEN/ROTTED": "", "FRAME": "", "CONVERTIBLE": "",
-                       "FRONT CARPETS": "", "UNDERCARRIAGE": "", "DRIVER MIRROR": "",
-                       "PASSENGER R DOOR": "", "AIR FLOW": "", "REAR SUSPENSION": "",
-                       "DRIVER R WINDOW": "", "PASSENGER F WINDOW": "", "PASSENGER F SEAT": "",
-                       "DRIVER R DOOR": "", "PASSENGER REAR QUARTER PANEL": "", "CYLINDER": "",
-                       "ISTONS": "", "GAS TANK COVER": "", "EXHAUST": "", "DRIVER R SEAT": "",
-                       "REAR BUMPER": "", "RIGHT QTR PANEL": "", "DASH": "", "ODOMETER": "",
-                       "TRANSMISSION": "", "DRIVER QUARTER PANEL": "", "BOTH PASS DOORS": "",
-                       "T/C": "", "IRBAG": "", "3RD ROW SEATS": "", "STEERING": "",
-                       "FRONT BUMPER": "", "EPC": "", "RADIO": "", "REAR CARPETS": "", "OIL": "",
-                       "CATALYTIC CONVERTER": "", "WINDSHIELD": "", "HEADLIGHTS": "",
-                       "DRIVER F SEAT": "", "HOOD": "", "ROOF": "", "PASSENGER MIRROR": "",
-                       "TAILGATE": "", "TRACTION CONTROL": "", "INTERIOR": "",
-                       "RAER HUB BEARINGS": "", "BATTERY": "", "ELECTRICAL": "",
-                       "AIR CONDITIONER": "", "CHECK ENGINE LIGHT": "", "FRONT SUSPENSION": "",
-                       "BRAKES": "", "Time Stamp": str(datetime.datetime.now())}
+        image_div = soup.find("div", class_="slideshow__photo_carousel ")
+        image = image_div.find("img")
+        if image:
+            image_url = image['src']
+        else:
+            image_url = ""
+
+        current_bid = soup.find("div", class_="vehicle__bid")
+        if current_bid:
+            current_bid = current_bid.text
+        else:
+            current_bid = ""
+
+        json_to_add = {"Title": title , "VIN": "", "Stock#": "", "Year": "",
+                        "Type": "", "Drive": "", "Engine": "", "Transmission": "",
+                        "Ext color": "", "Make": "", "Model": "", "Trim": "",
+                        "Odo": "", "Location": "", "Live Start": "","currency_code":"",
+                        "ENGINE": "", "lot_cond_code":"", "fuel_type":"","BODY": "",
+                        "KEYS": "","image_thumbnail":image_url,"CYLINDER": "",
+                        "yard_number":"", "yard_name":"","day_of_week":"", "sale_time":"",
+                        "time_zone":"","model_details":"", "damage_description":"",
+                        "secondary_damage":"", "sale_title_state":"", "sale_title_type":"",
+                        "odometer_brand":"", "est_retail_value":"", "repair_cost":"",
+                        "runs_drives":"", "sale_status":"",
+                        "high_bid_non_vix_sealed_vix":"", "special_note":"",
+                        "location_state":"", "location_zip5":"", "location_zip4":"",
+                        "location_country":"","create_date_time":"", "grid_row":"",
+                        "current_bid":current_bid, "buy_it_now_price":"", "images":"", "trim":"",
+                        "last_updated_time":"", "rentals":"", "copart_select":"", "source":"",
+                        "Time_Stamp": str(datetime.datetime.now())}
 
         # main parameters
         option_labels = [i.select('span.options__label')[0].text.strip().replace(':', '') for i in
@@ -195,18 +205,17 @@ class CapitalAutoAuction:
                              i.select('span.options__value--unbold') != []]
         condition_reports = [element for innerList in condition_reports for element in innerList]
 
-        vo_to_add = ', '.join([i for i in condition_reports if ':' not in i])
-        json_to_add["Vehicle Options"] += vo_to_add
-
         cr_labels = [i.split(':')[0].strip() for i in condition_reports if ':' in i]
         cr_values = [i.split(':')[1].strip() for i in condition_reports if ':' in i]
         for cr_counter in range(len(cr_labels)):
             if cr_labels[cr_counter] in self.master_json:
                 json_to_add[cr_labels[cr_counter]] += cr_values[cr_counter]
+                print(json_to_add)
 
         # Appending the data into main data (master_json)
         for data in json_to_add:
             self.master_json[data].append(json_to_add[data])
+
 
     @execution_time
     def scrap_data(self):
@@ -219,7 +228,10 @@ class CapitalAutoAuction:
 
 
 if __name__ == "__main__":
-    caa_obj = CapitalAutoAuction()
-    caa_obj.scrap_data()
+    try:
+        caa_obj = CapitalAutoAuction()
+        caa_obj.scrap_data()
+    except Exception:
+        print(Exception)
 
 # Took 251 seconds (4.18 mins) to execute
