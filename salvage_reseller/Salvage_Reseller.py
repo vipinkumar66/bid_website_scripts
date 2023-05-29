@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from requests.adapters import HTTPAdapter
+import urllib3
 from urllib3.util.retry import Retry
 
 print(__doc__) # prints the functionlity of the module using doc string
@@ -115,7 +116,8 @@ class Salvage:
 
                     # Process the response and break the loop if successful
                     break
-                except (requests.exceptions.Timeout, requests.exceptions.ReadTimeout):
+                except (requests.exceptions.Timeout, urllib3.exceptions.ReadTimeoutError
+                        ,requests.exceptions.ReadTimeout):
                     print(f"Timeout occurred. Retrying request ({attempt}/{max_attempt})...")
                     time.sleep(retry_delay)
             else:
