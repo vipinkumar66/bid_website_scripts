@@ -100,28 +100,26 @@ class Salvage:
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
             }
             max_attempt = 3
-            while True:
-                attempt = 1
-                while attempt <= max_attempt:
-                    try:
-                        time.sleep(3)
-                        session = requests.Session()
-                        retry = Retry(total=max_attempt, backoff_factor=0.5) # status_forcelist=[500, 502, 503, 504, 443]
-                        adapter = HTTPAdapter(max_retries=retry)
-                        session.mount('http://', adapter)
-                        session.mount('https://', adapter)
-                        resp = session.get(p_url, headers=headers, timeout=30)
-                        # Process the response and break the loop if successful
-                        break
-                    except requests.exceptions.Timeout:
-                        print(f"Timeout occurred. Retrying request ({attempt}/{max_attempt})...")
-                        attempt += 1
-                        time.sleep(60)  # Wait for 5 seconds before retrying
-                if attempt > max_attempt:
-                    print("Maximum number of attempts reached. Unable to complete the request.")
-                    # Handle the error condition or exit the program
-                    continue # Restart the loop from the beginning
-                break
+            retry_delay = 5  # Delay in seconds between retries
+
+            session = requests.Session()
+            retry = Retry(total=max_attempt, backoff_factor=0.5)
+            adapter = HTTPAdapter(max_retries=retry)
+            session.mount('http://', adapter)
+            session.mount('https://', adapter)
+
+            for attempt in range(1, max_attempt + 1):
+                try:
+                    resp = session.get(p_url, headers=headers, timeout=30)
+                    resp.raise_for_status()  # Check for HTTP errors
+
+                    # Process the response and break the loop if successful
+                    break
+                except (requests.exceptions.Timeout, requests.exceptions.ReadTimeout):
+                    print(f"Timeout occurred. Retrying request ({attempt}/{max_attempt})...")
+                    time.sleep(retry_delay)
+            else:
+                print("Maximum number of attempts reached. Unable to complete the request.")
             soup1 = BeautifulSoup(resp.content, 'html.parser')
             # try:
             #     div = soup1.find('div', text='Actual Cash Value:')
