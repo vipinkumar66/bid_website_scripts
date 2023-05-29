@@ -37,7 +37,8 @@ class CarsAndBids:
         """
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--headless')  # Run in headless mode
-        chrome_options.add_argument('--disable-gpu')  # Disable GPU acceleration (optional)
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--window-size=1920,1080')
 
         max_attempts = 3
         attempt = 1
