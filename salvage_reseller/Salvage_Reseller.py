@@ -8,6 +8,8 @@ import time
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 print(__doc__) # prints the functionlity of the module using doc string
 
@@ -19,24 +21,11 @@ class Salvage:
         os.chdir(self.script_dir)
 
         self.page1 = 0
-        self.page2 = 100
+        self.page2 = 25
         self.to_url = set()
         self.count = 1
         self.result = []
-        self.cookies = {
-            'ci_session': '9gql6mfokjgcqf1tbkc30915harhudub',
-            '_gcl_au': '1.1.279401309.1683827275',
-            '_ga': 'GA1.2.1339234171.1683827275',
-            '_gid': 'GA1.2.1405979944.1683827275',
-            'cebs': '1',
-            '_ce.clock_event': '1',
-            '_ce.clock_data': '122%2C49.37.158.243%2C1',
-            '_ce.s': 'v~b238d20743533497b5f0a1fccac02987dde3badf~lcw~1683827276467~vpv~0~v11.rlc~1683827276772~lcw~1683827276772',
-            '_gat_gtag_UA_655066_10': '1',
-            '_uetsid': 'f56700d0f02311ed8c62f314a43026b3',
-            '_uetvid': 'f5673db0f02311ed90ed1f9b13de0c5a',
-            'cebsp_': '15',
-        }
+
 
         self.headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
@@ -44,7 +33,7 @@ class Salvage:
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
             'Pragma': 'no-cache',
-            'Referer': f'https://www.salvagereseller.com/cars-for-sale/type/automobiles/page/{self.page1}',
+            'Referer': f'https://www.salvagereseller.com/cars-for-sale/type/automobiles/page/{self.page1}/',
             'Sec-Fetch-Dest': 'empty',
             'Sec-Fetch-Mode': 'cors',
             'Sec-Fetch-Site': 'same-origin',
@@ -75,9 +64,10 @@ class Salvage:
             print(headers['Referer'])
             rurl = headers['Referer'].replace(str(upd_page1), str(self.page2))
             print(rurl)
-            response = requests.get(
+            session = requests.Session()
+            response = session.get(
                 rurl,
-                cookies=self.cookies,
+
                 headers=headers,
                 timeout=10  # this is used to wait till 10 seconds for server to respond, if it doesn't
             )
@@ -94,10 +84,10 @@ class Salvage:
                     print(self.count, result)
                     self.to_url.add(result)
                     self.count = self.count + 1
-            upd_page1 += 100
+            upd_page1 += 25
             headers['Referer'] = f'https://www.salvagereseller.com/cars-for-sale/type/automobiles/page/{upd_page1}'
-            self.page2 += 100
-            if self.count >= 900:
+            self.page2 += 25
+            if self.count >= 3000:
                 break
         print(len(self.to_url))
 
@@ -114,7 +104,13 @@ class Salvage:
                 attempt = 1
                 while attempt <= max_attempt:
                     try:
-                        resp = requests.get(p_url, headers=headers, timeout=30)
+                        time.sleep(3)
+                        session = requests.Session()
+                        retry = Retry(total=max_attempt, backoff_factor=0.5) # status_forcelist=[500, 502, 503, 504, 443]
+                        adapter = HTTPAdapter(max_retries=retry)
+                        session.mount('http://', adapter)
+                        session.mount('https://', adapter)
+                        resp = session.get(p_url, headers=headers, timeout=30)
                         # Process the response and break the loop if successful
                         break
                     except requests.exceptions.Timeout:
