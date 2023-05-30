@@ -61,7 +61,7 @@ class Abetter:
                   newline='', encoding='utf-8') as csv_file:
             self.writer = csv.writer(csv_file)
             self.writer.writerow(
-                ['id', 'yard_number', 'yard_name', 'sale_date', 'day_of_week', 'sale_time', 'time_zone', 'item',
+                ['yard_number', 'yard_name', 'sale_date', 'day_of_week', 'sale_time', 'time_zone', 'item',
                  'lot_number', 'vehicle_type', 'year', 'make', 'model_group', 'model_detail', 'body_style', 'color',
                  'damage_description', 'secondary_damage', 'sale_title_state', 'sale_title_type', 'has_keys',
                  'lot_cond_code', 'vin', 'odometer', 'odometer_brand', 'est_retail_value', 'repair_cost', 'engine',
@@ -70,7 +70,7 @@ class Abetter:
                  'special_note', 'location_city', 'location_state', 'location_zip5', 'location_zip4',
                  'location_country', 'currency_code', 'image_thumbnail', 'create_date_time', 'grid_row',
                  'make_an_offer_eligible', 'buy_it_now_price', 'image_url', 'trim', 'last_updated_time', 'rentals',
-                 'copart_select', 'source', 'Link', 'Timestamp']
+                 'copart_select', 'source', 'Timestamp']
             )
 
             with ThreadPoolExecutor() as exe:
@@ -81,7 +81,7 @@ class Abetter:
         Get all links of cars to get detail data
         :param page_no: pagination to get all page data
         """
-        response = requests.get(f'https://abetter.bid/en/car-finder/year-2022-2023/page-{page_no}',
+        response = requests.get(f'https://abetter.bid/en/car-finder/page-{page_no}',
                                 headers=self.headers)
         soup = BeautifulSoup(response.content, 'html.parser')
         find_div = soup.find_all('div', class_='swiper-wrapper')
@@ -238,7 +238,6 @@ class Abetter:
             images = ""
 
         timestamp = datetime.now()
-        id_for_veh = ""
         yard_number = ""
         yard_name = ""
         try:
@@ -324,14 +323,14 @@ class Abetter:
                   newline='', encoding='utf-8') as csv_file:
             self.writer = csv.writer(csv_file)
             self.writer.writerow(
-                [id_for_veh, yard_number, yard_name, sale_date, day_of_week, sale_time, time_zone, item, lot,
+                [ yard_number, yard_name, sale_date, day_of_week, sale_time, time_zone, item, lot,
                  vehicle_type, production_year, make, model, model_details, body_style, color, damage_description,
                  secondary_damage, sale_title_state, sale_title_type, has_keys, lot_cond_code, vin, odometer,
                  odometer_brand, est_retail_value, repair_cost, engine_displacement, drive, vehicle_transmission,
                  fuel_type, cylinders, runs_drives, sale_status, high_bid_non_vix_sealed_vix, special_note,
                  location_city, location_state, location_zip5, location_zip4, location_country, currency_code,
                  image_thumbnail, create_date_time, grid_row, current_bid, buy_it_now_price, images, trim,
-                 last_updated_time, rentals, copart_select, source, link, timestamp]
+                 last_updated_time, rentals, copart_select, source, timestamp]
             )
 
 
