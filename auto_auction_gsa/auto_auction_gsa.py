@@ -58,6 +58,7 @@ class AutoGSA:
         self.driver.maximize_window()
 
         # SELECT ALL THE VEHICLE TYPE AND SEARCH
+        time.sleep(2)
         self.driver.find_elements(By.CLASS_NAME, "vehicle_sub")[8].click()
         time.sleep(2)
 
