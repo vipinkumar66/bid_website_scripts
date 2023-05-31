@@ -1,23 +1,32 @@
-import requests
-from constants import (headers, cookies,
-                       csv_headers)
-from bs4 import BeautifulSoup as bs
-from concurrent.futures import ThreadPoolExecutor
+"""Importing important libraries"""
+import os
 import csv
 import re
+from datetime import datetime
+import pandas as pd
+import requests
+from concurrent.futures import ThreadPoolExecutor
+from bs4 import BeautifulSoup as bs
+from constants import (headers, cookies,
+                       csv_headers, folder_name)
+
 
 class CarsBids:
+    """Get details about recent auctions"""
 
     def __init__(self) -> None:
+        """
+        Initializer Function
+        """
         self.session = requests.Session()
         self.auction_links_list = []
         self.items_link = []
         self.data = {"VIN":"", "Stock#":"", "Year":"", "Make":"", "Model":"",
                 "Type":"", "Drive":"", "Odo":"", "Engine":"", "Transmission":"",
                 "Ext color":"",'yard_number':"", 'yard_name':"", 'Live Start':"",
-                'day_of_week':"", 'Event':"", 'time_zone':"", 'item':"",'lot_number':"",
-                'vehicle_type':"", 'year':"", 'make':"", 'model_group':"",
-                'model_detail':"", 'body_style':"", 'color':"",'damage_description':"",
+                'day_of_week':"", 'Event':"", 'time_zone':"", 'item':"",
+                'model_group':"",
+                'model_detail':"",'damage_description':"",
                 'secondary_damage':"", 'sale_title_state':"", 'sale_title_type':"",
                 'has_keys':"",'lot_cond_code':"", 'odometer_brand':"", 'est_retail_value':"",
                 'repair_cost':"", 'fuel_type':"", 'cylinders':"", 'runs_drives':"",
@@ -29,7 +38,9 @@ class CarsBids:
                 'rentals':"",'copart_select':"", 'source':"", 'Timestamp':""}
 
     def get_auction_links(self) -> list:
-
+        """
+        To get the links of the recent auctions
+        """
         response = self.session.get(url='https://www.capitalautoauction.com/', cookies=cookies, headers=headers)
         soup = bs(response.content, "lxml")
 
@@ -65,6 +76,10 @@ class CarsBids:
                 break
 
     def get_items_data(self, items_links):
+        """
+        Get the link of items available in the
+        recent auctions
+        """
         print(items_links)
         response = self.session.get(f"{items_links}/", headers=headers, cookies=cookies)
         print(response.status_code)
@@ -72,6 +87,8 @@ class CarsBids:
 
         vehicle_title = soup.find("h1", class_="vehicle__title").text.replace(" ","")
         self.data['item'] = re.sub(r"\s", " ", vehicle_title)
+
+        self.data['Timestamp'] = datetime.now()
 
         # Vehicle data
         vehicle_data_details = soup.select("div.options.options--frame.vehicle__options")[0]
@@ -102,20 +119,46 @@ class CarsBids:
                     self.data[heading.split(":")[0].strip()] = value
                 else:
                     pass
-            with open("data.csv", "a", newline="", encoding="utf_8") as csv_file:
+
+            with open(f"{folder_name}/data.csv", "a", newline="", encoding="utf_8") as csv_file:
                 writer = csv.DictWriter(csv_file,fieldnames=csv_headers)
                 writer.writerow(self.data)
         except Exception as e:
             print(e)
 
+    def update_csv_headers(self):
+        """
+        Updating the csv headers
+        """
+        df = pd.read_csv(f"{folder_name}/data.csv")
+        conditions = {
+            "Stock#":"lot_number",
+            "Odo":"Odometer",
+            "Ext color":"Color",
+            "Live Start":"sale_date",
+            "Location":"location_city",
+            "Current Bid": "buy_it_now_price",
+            "Event":"sale_time",
+            "Type":"body_style"
+        }
+
+        new_headers = []
+        for header in df.columns:
+            new_header = conditions.get(header, header)  # Get the new header from conditions or keep the old one
+            new_headers.append(new_header)
+
+        df.columns = new_headers
+        df.to_csv(f"{folder_name}/data.csv", index=False)
+
 if __name__ == "__main__":
     obj = CarsBids()
-    with open("data.csv", "w", newline="", encoding="utf_8") as csv_file:
+    with open(f"{folder_name}/data.csv", "w", newline="", encoding="utf_8") as csv_file:
         writer = csv.DictWriter(csv_file,fieldnames=csv_headers)
         writer.writeheader()
     auction_list = obj.get_auction_links()
     with  ThreadPoolExecutor() as executor:
         executor.map(obj.get_items_from_auctions, auction_list)
+    obj.update_csv_headers()
 
 
 

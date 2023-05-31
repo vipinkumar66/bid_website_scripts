@@ -1,16 +1,19 @@
+"""
+Importing important libraries
+"""
 import os
 import re
 import time
 import csv
 from datetime import datetime
+import selenium
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
-import selenium
 from bs4 import BeautifulSoup as bs
 from constants import headers, folder_name
 
 class CarsAndBids:
-
+    """Scrap details about Auctions"""
     def __init__(self):
         """
         Initalizer function
@@ -62,7 +65,9 @@ class CarsAndBids:
             print("Failed to create WebDriver after multiple attempts.")
 
     def get_vehicle_url(self):
-
+        """
+        To get the url for each item
+        """
         page_source = self.driver.page_source
 
         soup = bs(page_source, "lxml")
