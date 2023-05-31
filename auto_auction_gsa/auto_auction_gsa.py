@@ -37,7 +37,7 @@ class AutoGSA:
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--headless')  # Run in headless mode
         chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--window-size=1920,1080')
+        # chrome_options.add_argument('--window-size=1920,1080')
         chrome_options.add_experimental_option('prefs', {
             'download.default_directory': self.download_directory,
             'download.prompt_for_download': False,
