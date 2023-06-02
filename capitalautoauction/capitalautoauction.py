@@ -1,5 +1,4 @@
 """Importing important libraries"""
-import os
 import csv
 import re
 from datetime import datetime
