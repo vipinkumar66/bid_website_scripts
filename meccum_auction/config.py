@@ -1,5 +1,8 @@
 import os
 from datetime import datetime
+from fake_useragent import UserAgent
+
+useragent = UserAgent()
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
@@ -50,8 +53,7 @@ auction_data_headers ={
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'cross-site',
                 'Sec-GPC': '1',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                              ' (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+                'User-Agent': useragent.random,
                 'content-type': 'application/x-www-form-urlencoded',
                 'sec-ch-ua': '"Brave";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
                 'sec-ch-ua-mobile': '?0',
