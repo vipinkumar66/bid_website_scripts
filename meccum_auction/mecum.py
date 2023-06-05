@@ -50,7 +50,6 @@ class MecumAuctions:
         """Extract all the auction names to be extracted from the website and returns the
          list of auction names."""
         auctions_response = requests.get(auction_url, timeout=10)
-        print(auctions_response)
         auctions_data = auctions_response.json()['data']['auctions']['edges']
         auctions_names = []
 
@@ -99,6 +98,7 @@ class MecumAuctions:
                 print(Exception)
                 import traceback
                 traceback.print_exc()
+            print(response.json())
 
             master_data = response.json()['results'][0]['hits']
 
