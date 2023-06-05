@@ -92,6 +92,7 @@ class MecumAuctions:
                                      'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
                                      'id=U6CFCQ7V52', headers=auction_data_headers, data=data, timeout=10)
             print(response.status_code)
+            print(data)
             master_data = response.json()['results'][0]['hits']
             print(master_data)
 
