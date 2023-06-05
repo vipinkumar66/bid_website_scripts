@@ -6,7 +6,6 @@ from urllib import parse
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 import csv
-import json
 import requests
 from bs4 import BeautifulSoup as bs
 from config import (folder_name, auction_url,
@@ -71,7 +70,7 @@ class MecumAuctions:
         while run_loop:
             try:
                 data = '{"requests":[{"indexName":"wp_posts_lot_feature_sort_asc","params":"facetFil' \
-                    'ters=%5B%5B%22taxonomies.auction_tax.name%3A' + parse.quote(auction_name, encoding="utf-8")+ \
+                    'ters=%5B%5B%22taxonomies.auction_tax.name%3A' + parse.quote(auction_name, encoding="utf-8", safe=":/")+ \
                     '%22%5D%5D&facets=%5B%22taxonomies.sale_result.name%22%2C%22taxonomies.auction' \
                     '_tax.name%22%2C%22taxonomies.lot_type.name%22%2C%22taxonomies.collection_tax.' \
                     'name%22%2C%22taxonomies.lot_year.name%22%2C%22taxonomies.make.name%22%2C%22ta' \
@@ -98,7 +97,8 @@ class MecumAuctions:
                 print(Exception)
                 import traceback
                 traceback.print_exc()
-            print(response.json())
+                break
+
 
             master_data = response.json()['results'][0]['hits']
 
