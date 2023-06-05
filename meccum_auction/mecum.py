@@ -71,7 +71,7 @@ class MecumAuctions:
         while run_loop:
             try:
                 data = '{"requests":[{"indexName":"wp_posts_lot_feature_sort_asc","params":"facetFil' \
-                    'ters=%5B%5B%22taxonomies.auction_tax.name%3A' + parse.quote(auction_name).encode('utf-8').decode('utf-8') + \
+                    'ters=%5B%5B%22taxonomies.auction_tax.name%3A' + auction_name.replace(" ","%20").encode('utf-8').decode('utf-8') + \
                     '%22%5D%5D&facets=%5B%22taxonomies.sale_result.name%22%2C%22taxonomies.auction' \
                     '_tax.name%22%2C%22taxonomies.lot_type.name%22%2C%22taxonomies.collection_tax.' \
                     'name%22%2C%22taxonomies.lot_year.name%22%2C%22taxonomies.make.name%22%2C%22ta' \
