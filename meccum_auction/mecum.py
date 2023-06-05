@@ -1,11 +1,11 @@
 """"Module to extract the bids' data from Mecum Website"""
 # Importing Required Libraries
 import time
-from urllib import parse
 from functools import wraps
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 import csv
+import sys
 import requests
 from bs4 import BeautifulSoup as bs
 from config import (folder_name, auction_url,
@@ -62,7 +62,6 @@ class MecumAuctions:
             auc_string = f"{auc_title}|{int(time.mktime(auc_start_date.timetuple()))}|" \
                          f"{int(time.mktime(auc_end_date.timetuple()))}"
             auctions_names.append(auc_string)
-            print(auctions_names)
         return auctions_names
 
     def get_auction_data(self, auction_name):
@@ -72,7 +71,7 @@ class MecumAuctions:
         while run_loop:
 
             data = '{"requests":[{"indexName":"wp_posts_lot_feature_sort_asc","params":"facetFil' \
-                   'ters=%5B%5B%22taxonomies.auction_tax.name%3A' + parse.quote(auction_name) + \
+                   'ters=%5B%5B%22taxonomies.auction_tax.name%3A' + auction_name.replace(" ", "%20") + \
                    '%22%5D%5D&facets=%5B%22taxonomies.sale_result.name%22%2C%22taxonomies.auction' \
                    '_tax.name%22%2C%22taxonomies.lot_type.name%22%2C%22taxonomies.collection_tax.' \
                    'name%22%2C%22taxonomies.lot_year.name%22%2C%22taxonomies.make.name%22%2C%22ta' \
