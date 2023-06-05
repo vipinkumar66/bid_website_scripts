@@ -52,7 +52,7 @@ class MecumAuctions:
         print(auctions_response)
         auctions_data = auctions_response.json()['data']['auctions']['edges']
         auctions_names = []
-        print(auctions_names)
+
         for auc in auctions_data:
             auc_title = auc['node']['title']
             auc_start_date = datetime.strptime(auc['node']['auctionFields']['auctionStartDate'],
@@ -62,6 +62,7 @@ class MecumAuctions:
             auc_string = f"{auc_title}|{int(time.mktime(auc_start_date.timetuple()))}|" \
                          f"{int(time.mktime(auc_end_date.timetuple()))}"
             auctions_names.append(auc_string)
+            print(auctions_names)
         return auctions_names
 
     def get_auction_data(self, auction_name):
