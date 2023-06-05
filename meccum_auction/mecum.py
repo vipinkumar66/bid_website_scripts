@@ -94,6 +94,8 @@ class MecumAuctions:
                                         'id=U6CFCQ7V52', headers=auction_data_headers, data=data, timeout=10)
             except Exception:
                 print(Exception)
+                import traceback
+                traceback.print_exc()
             print(response.status_code)
             print(data)
             master_data = response.json()['results'][0]['hits']
