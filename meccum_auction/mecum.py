@@ -49,8 +49,10 @@ class MecumAuctions:
         """Extract all the auction names to be extracted from the website and returns the
          list of auction names."""
         auctions_response = requests.get(auction_url, timeout=10)
+        print(auctions_response)
         auctions_data = auctions_response.json()['data']['auctions']['edges']
         auctions_names = []
+        print(auctions_names)
         for auc in auctions_data:
             auc_title = auc['node']['title']
             auc_start_date = datetime.strptime(auc['node']['auctionFields']['auctionStartDate'],
@@ -89,6 +91,7 @@ class MecumAuctions:
                                      'rch-hooks%20(6.38.1)%3B%20JS%20Helper%20(3.12.0)&x-algolia-ap'
                                      'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
                                      'id=U6CFCQ7V52', headers=auction_data_headers, data=data, timeout=10)
+            print(response.status_code)
             master_data = response.json()['results'][0]['hits']
 
             if master_data:
