@@ -93,6 +93,7 @@ class MecumAuctions:
                                      'id=U6CFCQ7V52', headers=auction_data_headers, data=data, timeout=10)
             print(response.status_code)
             master_data = response.json()['results'][0]['hits']
+            print(master_data)
 
             if master_data:
                 for data in master_data:
