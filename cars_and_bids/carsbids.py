@@ -91,7 +91,7 @@ class CarsAndBids:
         """
         To get  all the data related to bid vehicle
         """
-        for url in self.car_urls[:5]:
+        for url in self.car_urls:
             print(f"Scraping info from: {url}")
 
             if self.warning == 20:
@@ -163,35 +163,35 @@ class CarsAndBids:
         This will get all the vehicle details
         """
 
-        make_attribute = table_data.find("dt", text="Make")
+        make_attribute = table_data.find("dt", string="Make")
         make = make_attribute.find_next("dd").text if make_attribute else ""
 
         # Find model
-        model_attribute = table_data.find("dt", text="Model")
+        model_attribute = table_data.find("dt", string="Model")
         model = model_attribute.find_next("dd").text if model_attribute else ""
 
         # Find VIN
-        vin_attribute = table_data.find("dt", text="VIN")
+        vin_attribute = table_data.find("dt", string="VIN")
         vin = vin_attribute.find_next("dd").text if vin_attribute else ""
 
         # Find body style
-        body_style_attribute = table_data.find("dt", text="Body Style")
+        body_style_attribute = table_data.find("dt", string="Body Style")
         body_style = body_style_attribute.find_next("dd").text if body_style_attribute else ""
 
         # Find exterior color
-        color_attribute = table_data.find("dt", text="Exterior Color")
+        color_attribute = table_data.find("dt", string="Exterior Color")
         color = color_attribute.find_next("dd").text if color_attribute else ""
 
         # Find drivetrain
-        drive_attribute = table_data.find("dt", text="Drivetrain")
+        drive_attribute = table_data.find("dt", string="Drivetrain")
         drive = drive_attribute.find_next("dd").text if drive_attribute else ""
 
         # Find engine
-        engine_attribute = table_data.find("dt", text="Engine")
+        engine_attribute = table_data.find("dt", string="Engine")
         engine = engine_attribute.find_next("dd").text if engine_attribute else ""
 
         # Find transmission
-        transmission_attribute = table_data.find("dt", text="Transmission")
+        transmission_attribute = table_data.find("dt", string="Transmission")
         transmission = transmission_attribute.find_next("dd").text if transmission_attribute else ""
 
         return (make, model, vin, body_style, color, drive, engine, transmission)
@@ -201,7 +201,7 @@ class CarsAndBids:
         This will get the location details of the bid
         """
         # Find location
-        location_attribute = table_data.find("dt", text="Location")
+        location_attribute = table_data.find("dt", string="Location")
         if location_attribute:
             location = location_attribute.find_next("dd").text
             pattern = r'[0-9]{4,}'

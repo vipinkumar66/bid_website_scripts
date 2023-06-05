@@ -5,32 +5,20 @@ from urllib import parse
 from functools import wraps
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
-import pandas as pd
+import csv
 import requests
 from bs4 import BeautifulSoup as bs
-from config import folder_name, auction_url, auction_data_headers
+from config import (folder_name, auction_url,
+                    auction_data_headers, headers)
 
 
 class MecumAuctions:
     """Extracts the data of Bids from Mecum Bids Website"""
     def __init__(self):
         self.session = requests.session()
-        self.master_json = {"yard_number": [], "yard_name": [], "sale_date": [],
-                            "day_of_week": [], "sale_time": [], "time_zone": [], "item": [],
-                            "lot_number": [], "vehicle_type": [], "year": [], "make": [],
-                            "model_group": [], "model_detail": [], "body_style": [], "color": [],
-                            "damage_description": [], "secondary_damage": [],
-                            "sale_title_state": [], "sale_title_type": [], "has_keys": [],
-                            "lot_cond_code": [], "vin": [], "odometer": [], "odometer_brand": [],
-                            "est_retail_value": [], "repair_cost": [], "engine": [], "drive": [],
-                            "transmission": [], "fuel_type": [], "cylinders": [], "runs_drives": [],
-                            "sale_status": [], "high_bid_non_vix_sealed_vix": [],
-                            "special_note": [], "location_city": [], "location_state": [],
-                            "location_zip5": [], "location_zip4": [], "location_country": [],
-                            "currency_code": [], "image_thumbnail": [], "create_date_time": [],
-                            "grid_row": [], "make_an_offer_eligible": [], "buy_it_now_price": [],
-                            "image_url": [], "trim": [], "last_updated_time": [], "rentals": [],
-                            "copart_select": [], "source": []}
+        with open(f"{folder_name}/meccum_data.csv", "w", encoding="utf-8") as file_:
+            writer = csv.writer(file_)
+            writer.writerow(headers)
 
     @staticmethod
     def execution_time(function):
@@ -102,8 +90,7 @@ class MecumAuctions:
                                      'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
                                      'id=U6CFCQ7V52', headers=auction_data_headers, data=data, timeout=10)
             master_data = response.json()['results'][0]['hits']
-            # with open("text.txt", "w", encoding="utf-8") as file_:
-            #     file_.write(master_data)
+
             if master_data:
                 for data in master_data:
                     try:
@@ -112,89 +99,130 @@ class MecumAuctions:
                         if item_url:
                             vin = self.get_vin(item_url)
 
-                        self.master_json["vehicle_type"].append(data['post_type_label']
-                                                                if 'post_type_label' in data else "")
-                        self.master_json["item"].append(data['post_title']
-                                                        if 'post_title' in data else "")
-                        self.master_json["sale_date"].append(datetime.strptime(
-                            data['post_date_formatted'], '%B %d, %Y')
-                                                            if 'post_date_formatted' in data else "")
-                        self.master_json["sale_time"].append(
-                            datetime.fromtimestamp(int(data['post_date'])).strftime('%H:%M:%S')
-                            if 'post_date' in data else "")
-                        self.master_json["day_of_week"].append(
-                            datetime.strptime(data['post_date_formatted'], '%B %d, %Y').strftime('%A')
-                            if 'post_date_formatted' in data else "")
-                        self.master_json["color"].append(
-                            data['color_meta'] if 'color_meta' in data else "")
-                        self.master_json["body_style"].append(
-                            data['taxonomies']['body_type'][0]['name']
-                            if 'body_type' in data['taxonomies'] else "")
-                        self.master_json["engine"].append(
-                            data['engine_configuration_meta']
-                            if 'engine_configuration_meta' in data else "")
-                        self.master_json["lot_number"].append(
-                            data['lot_number_meta'] if 'lot_number_meta' in data else "")
-                        self.master_json["year"].append(
-                            data['taxonomies']['lot_year'][0]['name']
-                            if 'lot_year' in data['taxonomies'] else "")
-                        self.master_json["est_retail_value"].append(
-                            data['high_estimate_meta'] if 'high_estimate_meta' in data else "")
-                        self.master_json["transmission"].append(
-                            data['transmission_type_meta'] if 'transmission_type_meta' in data else "")
-                        self.master_json["sale_status"].append(
-                            data['status_ranking'] if 'status_ranking' in data else "")
-                        self.master_json["yard_number"].append("")
-                        self.master_json["yard_name"].append("")
-                        self.master_json["time_zone"].append("")
-                        if 'make' in data['taxonomies'] and data['taxonomies']['make']:
-                            self.master_json["make"].append(data[
-                                'taxonomies']['make'][0]['name'])
-                        else:
-                            self.master_json["make"].append("")
+                        try:
+                            vehicle_type = data['post_type_label'] if 'post_type_label' in data else ""
+                        except:
+                            vehicle_type = ""
 
-                        self.master_json["model_group"].append("")
+                        try:
+                            item = data['post_title'] if 'post_title' in data else ""
+                        except:
+                            item = ""
 
-                        if 'model' in data['taxonomies'] and data['taxonomies']['model']:
-                            self.master_json["model_detail"].append(data[
-                                'taxonomies']['model'][0]['name'])
-                        else:
-                            self.master_json["model_detail"].append("")
+                        try:
+                            sale_date = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
+                                         if 'post_date_formatted' in data else "")
+                        except:
+                            sale_date = ""
 
-                        self.master_json["damage_description"].append("")
-                        self.master_json["secondary_damage"].append("")
-                        self.master_json["sale_title_state"].append("")
-                        self.master_json["sale_title_type"].append("")
-                        self.master_json["has_keys"].append("")
-                        self.master_json["lot_cond_code"].append("")
-                        self.master_json["vin"].append(vin if vin is not None else "")
-                        self.master_json["odometer"].append("")
-                        self.master_json["odometer_brand"].append("")
-                        self.master_json["repair_cost"].append("")
-                        self.master_json["drive"].append("")
-                        self.master_json["fuel_type"].append("")
-                        self.master_json["cylinders"].append("")
-                        self.master_json["runs_drives"].append("")
-                        self.master_json["high_bid_non_vix_sealed_vix"].append("")
-                        self.master_json["special_note"].append("")
-                        self.master_json["location_city"].append("")
-                        self.master_json["location_state"].append("")
-                        self.master_json["location_zip5"].append("")
-                        self.master_json["location_zip4"].append("")
-                        self.master_json["location_country"].append("")
-                        self.master_json["currency_code"].append("")
-                        self.master_json["image_thumbnail"].append("")
-                        self.master_json["create_date_time"].append("")
-                        self.master_json["grid_row"].append("")
-                        self.master_json["make_an_offer_eligible"].append("")
-                        self.master_json["buy_it_now_price"].append("")
-                        image_urls = [image['url'] for image in data['images_meta']]
-                        self.master_json["image_url"].append(",".join(image_urls))
-                        self.master_json["trim"].append("")
-                        self.master_json["last_updated_time"].append("")
-                        self.master_json["rentals"].append("")
-                        self.master_json["copart_select"].append("")
-                        self.master_json["source"].append("")
+                        try:
+                            sale_time = (datetime.fromtimestamp(int(data['post_date'])).strftime('%H:%M:%S')
+                                if 'post_date' in data else "")
+                        except:
+                            sale_time = ""
+
+                        try:
+                            day_of_week = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
+                                           .strftime('%A') if 'post_date_formatted' in data else "")
+                        except:
+                            day_of_week = ""
+
+                        try:
+                            color = data['color_meta'] if 'color_meta' in data else ""
+                        except:
+                            color = ""
+
+                        try:
+                            body_style = (data['taxonomies']['body_type'][0]['name']
+                                            if 'body_type' in data['taxonomies'] else "")
+                        except:
+                            body_style =""
+
+                        try:
+                            engine = (data['engine_configuration_meta']
+                                if 'engine_configuration_meta' in data else "")
+                        except:
+                            engine = ""
+
+                        try:
+                            lot_number = data['lot_number_meta'] if 'lot_number_meta' in data else ""
+                        except:
+                            lot_number = ""
+
+                        try:
+                            year = (data['taxonomies']['lot_year'][0]['name']
+                                if 'lot_year' in data['taxonomies'] else "")
+                        except:
+                            year = ""
+
+                        try:
+                            est_retail_value = (data['high_estimate_meta'] if 'high_estimate_meta'
+                                                in data else "")
+                        except:
+                            est_retail_value = ""
+
+                        try:
+                            transmission = (data['transmission_type_meta'] if 'transmission_type_meta'
+                                            in data else "")
+                        except:
+                            transmission = ""
+
+                        try:
+                            sale_status = data['status_ranking'] if 'status_ranking' in data else ""
+                        except:
+                            sale_status = ""
+                        yard_number = ""
+                        yard_name = ""
+                        time_zone = ""
+                        try:
+                            if 'make' in data['taxonomies'] and data['taxonomies']['make']:
+                                make = (data[
+                                    'taxonomies']['make'][0]['name'])
+                        except:
+                            make = ""
+
+                        model_group = ""
+
+                        try:
+                            if 'model' in data['taxonomies'] and data['taxonomies']['model']:
+                                model_detail = (data[
+                                    'taxonomies']['model'][0]['name'])
+                        except:
+                            model_detail = ""
+
+                        try:
+                            vin = vin if vin is not None else ""
+                        except:
+                            vin = ""
+                        currency_code = "$"
+
+                        try:
+                            image_url = [image['url'] for image in data.get('images_meta', [])] if data.get('images_meta') else ""
+                            image_urls = ",".join(image_url)
+                        except:
+                            image_urls = ""
+
+                        damage_description = secondary_damage = sale_title_state =\
+                        sale_title_type = has_keys = lot_cond_code = vin =\
+                        odometer = odometer_brand = repair_cost = drive = fuel_type = \
+                        cylinders = runs_drives = high_bid_non_vix_sealed_vix = \
+                        special_note = location_city = location_state = location_zip5 = \
+                        location_zip4 = location_country = image_thumbnail = create_date_time = \
+                        grid_row = make_an_offer_eligible = buy_it_now_price = trim = \
+                        last_updated_time = rentals = copart_select = source = ""
+
+                        data = [yard_number, yard_name, sale_date, day_of_week, sale_time, time_zone, item, lot_number,
+                        vehicle_type, year, make, model_detail, model_group, body_style, color, damage_description,
+                        secondary_damage, sale_title_state, sale_title_type, has_keys, lot_cond_code, vin, odometer,
+                        odometer_brand, est_retail_value, repair_cost, engine, drive, transmission,
+                        fuel_type, cylinders, runs_drives, sale_status, high_bid_non_vix_sealed_vix, special_note,
+                        location_city, location_state, location_zip5, location_zip4, location_country, currency_code,
+                        image_thumbnail, create_date_time, grid_row, make_an_offer_eligible, buy_it_now_price, image_urls, trim,
+                        last_updated_time, rentals, copart_select, source]
+
+                        with open(f"{folder_name}/meccum_data.csv", "a", newline="", encoding="utf-8") as file:
+                            writer = csv.writer(file)
+                            writer.writerow(data)
                     except Exception as e:
                         print(e)
             else:
@@ -206,24 +234,23 @@ class MecumAuctions:
         item_page = self.session.get(f"https://www.mecum.com{item_url}",
                                                      headers=auction_data_headers)
         soup = bs(item_page.text, "lxml")
-        vin = soup.find("div", class_="LotHeader_odometerSerial___fuHb").text.split(
+        try:
+            vin = soup.find("div", class_="LotHeader_odometerSerial___fuHb").text.split(
                             "VIN / Serial")[-1].strip()
+        except:
+            vin = ""
         return vin
 
     @execution_time
-    def scrap_all_auctions_data(self, output_file_name):
+    def scrap_all_auctions_data(self):
         """Scraps all the data from the website from different auctions and
          generated the CSV of the data"""
         auction_names = self.get_auction_names()
-        print(f"Total auctions: {len(auction_names)}")
         with ThreadPoolExecutor() as executor:
-            executor.map(self.get_auction_data, auction_names)
-        for i in self.master_json:
-            print(len(self.master_json[i]))
-        dataframe = pd.DataFrame(self.master_json)
-        dataframe.to_csv(f"{folder_name}/{output_file_name}", index=False)
+            print(auction_names[:1])
+            executor.map(self.get_auction_data, auction_names[:4])
 
 if __name__ == "__main__":
     mecum_obj = MecumAuctions()
-    mecum_obj.scrap_all_auctions_data(output_file_name="Mecum_Auctions_Data.csv")
+    mecum_obj.scrap_all_auctions_data()
 
