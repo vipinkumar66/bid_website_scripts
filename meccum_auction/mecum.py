@@ -2,6 +2,7 @@
 # Importing Required Libraries
 import time
 from functools import wraps
+from urllib import parse
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 import csv
@@ -69,23 +70,22 @@ class MecumAuctions:
         page = 0
         run_loop = True
         while run_loop:
-
-            data = '{"requests":[{"indexName":"wp_posts_lot_feature_sort_asc","params":"facetFil' \
-                   'ters=%5B%5B%22taxonomies.auction_tax.name%3A' + auction_name.replace(" ", "%20") + \
-                   '%22%5D%5D&facets=%5B%22taxonomies.sale_result.name%22%2C%22taxonomies.auction' \
-                   '_tax.name%22%2C%22taxonomies.lot_type.name%22%2C%22taxonomies.collection_tax.' \
-                   'name%22%2C%22taxonomies.lot_year.name%22%2C%22taxonomies.make.name%22%2C%22ta' \
-                   'xonomies.model.name%22%2C%22taxonomies.body_type.name%22%2C%22color_meta%22%2' \
-                   'C%22interior_meta%22%2C%22engine_configuration_meta%22%2C%22transmission_type' \
-                   '_meta%22%2C%22taxonomies.run_date.timestamp%22%5D&filters=&highlightPostTag=_' \
-                   '_%2Fais-highlight__&highlightPreTag=__ais-highlight__&hitsPerPage=96&maxValue' \
-                   'sPerFacet=50&page=' + str(page) + \
-                   '&query=&tagFilters="},{"indexName":"wp_posts_lot_feature_sort_asc","params":"' \
-                   'analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filte' \
-                   'rs=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&h' \
-                   'itsPerPage=0&maxValuesPerFacet=50&page=0&query="}]}'
             try:
-                json_payload = json.dumps(data)
+                data = '{"requests":[{"indexName":"wp_posts_lot_feature_sort_asc","params":"facetFil' \
+                    'ters=%5B%5B%22taxonomies.auction_tax.name%3A' + parse.quote(auction_name).encode('utf-8') + \
+                    '%22%5D%5D&facets=%5B%22taxonomies.sale_result.name%22%2C%22taxonomies.auction' \
+                    '_tax.name%22%2C%22taxonomies.lot_type.name%22%2C%22taxonomies.collection_tax.' \
+                    'name%22%2C%22taxonomies.lot_year.name%22%2C%22taxonomies.make.name%22%2C%22ta' \
+                    'xonomies.model.name%22%2C%22taxonomies.body_type.name%22%2C%22color_meta%22%2' \
+                    'C%22interior_meta%22%2C%22engine_configuration_meta%22%2C%22transmission_type' \
+                    '_meta%22%2C%22taxonomies.run_date.timestamp%22%5D&filters=&highlightPostTag=_' \
+                    '_%2Fais-highlight__&highlightPreTag=__ais-highlight__&hitsPerPage=96&maxValue' \
+                    'sPerFacet=50&page=' + str(page) + \
+                    '&query=&tagFilters="},{"indexName":"wp_posts_lot_feature_sort_asc","params":"' \
+                    'analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filte' \
+                    'rs=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&h' \
+                    'itsPerPage=0&maxValuesPerFacet=50&page=0&query="}]}'
+
                 response = self.session.post('https://u6cfcq7v52-1.algolianet.com/1/indexes/*/queries?x-alg'
                                         'olia-agent=Algolia%20for%20JavaScript%20(4.17.0)%3B%20Browser'
                                         '%20(lite)%3B%20instantsearch.js%20(4.55.0)%3B%20react%20(18.2'
@@ -93,13 +93,13 @@ class MecumAuctions:
                                         'rch-hooks%20(6.38.1)%3B%20JS%20Helper%20(3.12.0)&x-algolia-ap'
                                         'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
                                         'id=U6CFCQ7V52', headers=auction_data_headers,
-                                        data=json_payload.encode("utf-8"),
+                                        data=data,
                                         timeout=10)
             except Exception:
                 print(Exception)
                 import traceback
                 traceback.print_exc()
-            response.raise_for_status()
+
             print(data)
             master_data = response.json()['results'][0]['hits']
             print(master_data)
@@ -260,7 +260,6 @@ class MecumAuctions:
          generated the CSV of the data"""
         auction_names = self.get_auction_names()
         with ThreadPoolExecutor() as executor:
-            print(auction_names[:1])
             executor.map(self.get_auction_data, auction_names[:4])
 
 if __name__ == "__main__":
