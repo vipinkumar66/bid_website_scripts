@@ -84,13 +84,16 @@ class MecumAuctions:
                    'analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filte' \
                    'rs=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&h' \
                    'itsPerPage=0&maxValuesPerFacet=50&page=0&query="}]}'
-            response = self.session.post('https://u6cfcq7v52-1.algolianet.com/1/indexes/*/queries?x-alg'
-                                     'olia-agent=Algolia%20for%20JavaScript%20(4.17.0)%3B%20Browser'
-                                     '%20(lite)%3B%20instantsearch.js%20(4.55.0)%3B%20react%20(18.2'
-                                     '.0)%3B%20react-instantsearch%20(6.38.1)%3B%20react-instantsea'
-                                     'rch-hooks%20(6.38.1)%3B%20JS%20Helper%20(3.12.0)&x-algolia-ap'
-                                     'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
-                                     'id=U6CFCQ7V52', headers=auction_data_headers, data=data, timeout=10)
+            try:
+                response = self.session.post('https://u6cfcq7v52-1.algolianet.com/1/indexes/*/queries?x-alg'
+                                        'olia-agent=Algolia%20for%20JavaScript%20(4.17.0)%3B%20Browser'
+                                        '%20(lite)%3B%20instantsearch.js%20(4.55.0)%3B%20react%20(18.2'
+                                        '.0)%3B%20react-instantsearch%20(6.38.1)%3B%20react-instantsea'
+                                        'rch-hooks%20(6.38.1)%3B%20JS%20Helper%20(3.12.0)&x-algolia-ap'
+                                        'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
+                                        'id=U6CFCQ7V52', headers=auction_data_headers, data=data, timeout=10)
+            except Exception:
+                print(Exception)
             print(response.status_code)
             print(data)
             master_data = response.json()['results'][0]['hits']
