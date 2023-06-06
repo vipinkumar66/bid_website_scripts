@@ -69,200 +69,201 @@ class MecumAuctions:
         page = 0
         run_loop = True
         while run_loop:
-            try:
-                payload = json.dumps({
-                        "requests": [
-                            {
-                                "indexName": "wp_posts_lot_feature_sort_asc",
-                                "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A+{parse.quote(auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
-                                "facets": [
-                                    "taxonomies.sale_result.name",
-                                    "taxonomies.auction_tax.name",
-                                    "taxonomies.lot_type.name",
-                                    "taxonomies.collection_tax.name",
-                                    "taxonomies.lot_year.name",
-                                    "taxonomies.make.name",
-                                    "taxonomies.model.name",
-                                    "taxonomies.body_type.name",
-                                    "color_meta",
-                                    "interior_meta",
-                                    "engine_configuration_meta",
-                                    "transmission_type_meta",
-                                    "taxonomies.run_date.timestamp"
-                                ],
-                                "filters": "",
-                                "highlightPostTag": "__/ais-highlight__",
-                                "highlightPreTag": "__ais-highlight__",
-                                "hitsPerPage": 96,
-                                "maxValuesPerFacet": 50,
-                                "page": 0,
-                                "query": "",
-                                "tagFilters": ""
-                            },
-                            {
-                                "indexName": "wp_posts_lot_feature_sort_asc",
-                                "params": "analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filters=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&hitsPerPage=0&maxValuesPerFacet=50&page=0&query="
-                            }
-                        ]
-                    })
-
-                response = self.session.post('https://u6cfcq7v52-1.algolianet.com/1/indexes/*/queries?x-alg'
-                                        'olia-agent=Algolia%20for%20JavaScript%20(4.17.0)%3B%20Browser'
-                                        '%20(lite)%3B%20instantsearch.js%20(4.55.0)%3B%20react%20(18.2'
-                                        '.0)%3B%20react-instantsearch%20(6.38.1)%3B%20react-instantsea'
-                                        'rch-hooks%20(6.38.1)%3B%20JS%20Helper%20(3.12.0)&x-algolia-ap'
-                                        'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
-                                        'id=U6CFCQ7V52', headers=auction_data_headers,
-                                        data=payload,
-                                        timeout=10)
-                print(response.content)
-            except Exception:
-                print(Exception)
-                import traceback
-                traceback.print_exc()
-                break
+            payload = {
+                    "requests": [
+                        {
+                            "indexName": "wp_posts_lot_feature_sort_asc",
+                            "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A+{parse.quote(auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
+                            "facets": [
+                                "taxonomies.sale_result.name",
+                                "taxonomies.auction_tax.name",
+                                "taxonomies.lot_type.name",
+                                "taxonomies.collection_tax.name",
+                                "taxonomies.lot_year.name",
+                                "taxonomies.make.name",
+                                "taxonomies.model.name",
+                                "taxonomies.body_type.name",
+                                "color_meta",
+                                "interior_meta",
+                                "engine_configuration_meta",
+                                "transmission_type_meta",
+                                "taxonomies.run_date.timestamp"
+                            ],
+                            "filters": "",
+                            "highlightPostTag": "__/ais-highlight__",
+                            "highlightPreTag": "__ais-highlight__",
+                            "hitsPerPage": 96,
+                            "maxValuesPerFacet": 50,
+                            "page": 0,
+                            "query": "",
+                            "tagFilters": ""
+                        },
+                        {
+                            "indexName": "wp_posts_lot_feature_sort_asc",
+                            "params": "analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filters=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&hitsPerPage=0&maxValuesPerFacet=50&page=0&query="
+                        }
+                    ]
+                }
+            self.extract(payload, page)
 
 
-            master_data = response.json()['results'][0]['hits']
+    def extract(self,details, page_number):
+        try:
+            details = json.dumps(details)
+            response = self.session.post('https://u6cfcq7v52-1.algolianet.com/1/indexes/*/queries?x-alg'
+                                    'olia-agent=Algolia%20for%20JavaScript%20(4.17.0)%3B%20Browser'
+                                    '%20(lite)%3B%20instantsearch.js%20(4.55.0)%3B%20react%20(18.2'
+                                    '.0)%3B%20react-instantsearch%20(6.38.1)%3B%20react-instantsea'
+                                    'rch-hooks%20(6.38.1)%3B%20JS%20Helper%20(3.12.0)&x-algolia-ap'
+                                    'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
+                                    'id=U6CFCQ7V52', headers=auction_data_headers,
+                                    data=details,
+                                    timeout=10)
+            print(response.content)
+        except Exception:
+            print(Exception)
+            import traceback
+            traceback.print_exc()
 
-            if master_data:
-                for data in master_data:
+        master_data = response.json()['results'][0]['hits']
+
+        if master_data:
+            for data in master_data:
+                try:
+
+                    item_url = data.get('permalink', "")
+                    if item_url:
+                        vin = self.get_vin(item_url)
+
                     try:
+                        vehicle_type = data['post_type_label'] if 'post_type_label' in data else ""
+                    except:
+                        vehicle_type = ""
 
-                        item_url = data.get('permalink', "")
-                        if item_url:
-                            vin = self.get_vin(item_url)
+                    try:
+                        item = data['post_title'] if 'post_title' in data else ""
+                    except:
+                        item = ""
 
-                        try:
-                            vehicle_type = data['post_type_label'] if 'post_type_label' in data else ""
-                        except:
-                            vehicle_type = ""
+                    try:
+                        sale_date = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
+                                        if 'post_date_formatted' in data else "")
+                    except:
+                        sale_date = ""
 
-                        try:
-                            item = data['post_title'] if 'post_title' in data else ""
-                        except:
-                            item = ""
+                    try:
+                        sale_time = (datetime.fromtimestamp(int(data['post_date'])).strftime('%H:%M:%S')
+                            if 'post_date' in data else "")
+                    except:
+                        sale_time = ""
 
-                        try:
-                            sale_date = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
-                                         if 'post_date_formatted' in data else "")
-                        except:
-                            sale_date = ""
+                    try:
+                        day_of_week = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
+                                        .strftime('%A') if 'post_date_formatted' in data else "")
+                    except:
+                        day_of_week = ""
 
-                        try:
-                            sale_time = (datetime.fromtimestamp(int(data['post_date'])).strftime('%H:%M:%S')
-                                if 'post_date' in data else "")
-                        except:
-                            sale_time = ""
+                    try:
+                        color = data['color_meta'] if 'color_meta' in data else ""
+                    except:
+                        color = ""
 
-                        try:
-                            day_of_week = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
-                                           .strftime('%A') if 'post_date_formatted' in data else "")
-                        except:
-                            day_of_week = ""
+                    try:
+                        body_style = (data['taxonomies']['body_type'][0]['name']
+                                        if 'body_type' in data['taxonomies'] else "")
+                    except:
+                        body_style =""
 
-                        try:
-                            color = data['color_meta'] if 'color_meta' in data else ""
-                        except:
-                            color = ""
+                    try:
+                        engine = (data['engine_configuration_meta']
+                            if 'engine_configuration_meta' in data else "")
+                    except:
+                        engine = ""
 
-                        try:
-                            body_style = (data['taxonomies']['body_type'][0]['name']
-                                            if 'body_type' in data['taxonomies'] else "")
-                        except:
-                            body_style =""
+                    try:
+                        lot_number = data['lot_number_meta'] if 'lot_number_meta' in data else ""
+                    except:
+                        lot_number = ""
 
-                        try:
-                            engine = (data['engine_configuration_meta']
-                                if 'engine_configuration_meta' in data else "")
-                        except:
-                            engine = ""
+                    try:
+                        year = (data['taxonomies']['lot_year'][0]['name']
+                            if 'lot_year' in data['taxonomies'] else "")
+                    except:
+                        year = ""
 
-                        try:
-                            lot_number = data['lot_number_meta'] if 'lot_number_meta' in data else ""
-                        except:
-                            lot_number = ""
-
-                        try:
-                            year = (data['taxonomies']['lot_year'][0]['name']
-                                if 'lot_year' in data['taxonomies'] else "")
-                        except:
-                            year = ""
-
-                        try:
-                            est_retail_value = (data['high_estimate_meta'] if 'high_estimate_meta'
-                                                in data else "")
-                        except:
-                            est_retail_value = ""
-
-                        try:
-                            transmission = (data['transmission_type_meta'] if 'transmission_type_meta'
+                    try:
+                        est_retail_value = (data['high_estimate_meta'] if 'high_estimate_meta'
                                             in data else "")
-                        except:
-                            transmission = ""
+                    except:
+                        est_retail_value = ""
 
-                        try:
-                            sale_status = data['status_ranking'] if 'status_ranking' in data else ""
-                        except:
-                            sale_status = ""
-                        yard_number = ""
-                        yard_name = ""
-                        time_zone = ""
-                        try:
-                            if 'make' in data['taxonomies'] and data['taxonomies']['make']:
-                                make = (data[
-                                    'taxonomies']['make'][0]['name'])
-                        except:
-                            make = ""
+                    try:
+                        transmission = (data['transmission_type_meta'] if 'transmission_type_meta'
+                                        in data else "")
+                    except:
+                        transmission = ""
 
-                        model_group = ""
+                    try:
+                        sale_status = data['status_ranking'] if 'status_ranking' in data else ""
+                    except:
+                        sale_status = ""
+                    yard_number = ""
+                    yard_name = ""
+                    time_zone = ""
+                    try:
+                        if 'make' in data['taxonomies'] and data['taxonomies']['make']:
+                            make = (data[
+                                'taxonomies']['make'][0]['name'])
+                    except:
+                        make = ""
 
-                        try:
-                            if 'model' in data['taxonomies'] and data['taxonomies']['model']:
-                                model_detail = (data[
-                                    'taxonomies']['model'][0]['name'])
-                        except:
-                            model_detail = ""
+                    model_group = ""
 
-                        try:
-                            vin = vin if vin is not None else ""
-                        except:
-                            vin = ""
-                        currency_code = "$"
+                    try:
+                        if 'model' in data['taxonomies'] and data['taxonomies']['model']:
+                            model_detail = (data[
+                                'taxonomies']['model'][0]['name'])
+                    except:
+                        model_detail = ""
 
-                        try:
-                            image_url = [image['url'] for image in data.get('images_meta', [])] if data.get('images_meta') else ""
-                            image_urls = ",".join(image_url)
-                        except:
-                            image_urls = ""
+                    try:
+                        vin = vin if vin is not None else ""
+                    except:
+                        vin = ""
+                    currency_code = "$"
 
-                        damage_description = secondary_damage = sale_title_state =\
-                        sale_title_type = has_keys = lot_cond_code = vin =\
-                        odometer = odometer_brand = repair_cost = drive = fuel_type = \
-                        cylinders = runs_drives = high_bid_non_vix_sealed_vix = \
-                        special_note = location_city = location_state = location_zip5 = \
-                        location_zip4 = location_country = image_thumbnail = create_date_time = \
-                        grid_row = make_an_offer_eligible = buy_it_now_price = trim = \
-                        last_updated_time = rentals = copart_select = source = ""
+                    try:
+                        image_url = [image['url'] for image in data.get('images_meta', [])] if data.get('images_meta') else ""
+                        image_urls = ",".join(image_url)
+                    except:
+                        image_urls = ""
 
-                        data = [yard_number, yard_name, sale_date, day_of_week, sale_time, time_zone, item, lot_number,
-                        vehicle_type, year, make, model_detail, model_group, body_style, color, damage_description,
-                        secondary_damage, sale_title_state, sale_title_type, has_keys, lot_cond_code, vin, odometer,
-                        odometer_brand, est_retail_value, repair_cost, engine, drive, transmission,
-                        fuel_type, cylinders, runs_drives, sale_status, high_bid_non_vix_sealed_vix, special_note,
-                        location_city, location_state, location_zip5, location_zip4, location_country, currency_code,
-                        image_thumbnail, create_date_time, grid_row, make_an_offer_eligible, buy_it_now_price, image_urls, trim,
-                        last_updated_time, rentals, copart_select, source]
+                    damage_description = secondary_damage = sale_title_state =\
+                    sale_title_type = has_keys = lot_cond_code = vin =\
+                    odometer = odometer_brand = repair_cost = drive = fuel_type = \
+                    cylinders = runs_drives = high_bid_non_vix_sealed_vix = \
+                    special_note = location_city = location_state = location_zip5 = \
+                    location_zip4 = location_country = image_thumbnail = create_date_time = \
+                    grid_row = make_an_offer_eligible = buy_it_now_price = trim = \
+                    last_updated_time = rentals = copart_select = source = ""
 
-                        with open(f"{folder_name}/meccum_data.csv", "a", newline="", encoding="utf-8") as file:
-                            writer = csv.writer(file)
-                            writer.writerow(data)
-                    except Exception as e:
-                        print(e)
-            else:
-                break
-            print(f"Page scraped till: {page}")
-            page += 1
+                    data = [yard_number, yard_name, sale_date, day_of_week, sale_time, time_zone, item, lot_number,
+                    vehicle_type, year, make, model_detail, model_group, body_style, color, damage_description,
+                    secondary_damage, sale_title_state, sale_title_type, has_keys, lot_cond_code, vin, odometer,
+                    odometer_brand, est_retail_value, repair_cost, engine, drive, transmission,
+                    fuel_type, cylinders, runs_drives, sale_status, high_bid_non_vix_sealed_vix, special_note,
+                    location_city, location_state, location_zip5, location_zip4, location_country, currency_code,
+                    image_thumbnail, create_date_time, grid_row, make_an_offer_eligible, buy_it_now_price, image_urls, trim,
+                    last_updated_time, rentals, copart_select, source]
+
+                    with open(f"{folder_name}/meccum_data.csv", "a", newline="", encoding="utf-8") as file:
+                        writer = csv.writer(file)
+                        writer.writerow(data)
+                except Exception as e:
+                    print(e)
+
+        print(f"Page scraped till: {page_number}")
+        page_number += 1
 
     def get_vin(self, item_url):
         item_page = self.session.get(f"https://www.mecum.com{item_url}",
