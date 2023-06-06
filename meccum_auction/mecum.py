@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 import csv
 import json
-import sys
 import requests
 from bs4 import BeautifulSoup as bs
 from config import (folder_name, auction_url,
@@ -70,68 +69,61 @@ class MecumAuctions:
         page = 0
         run_loop = True
         while run_loop:
-            payload = {
-                    "requests": [
-                        {
-                            "indexName": "wp_posts_lot_feature_sort_asc",
-                            "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A+{parse.quote(auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
-                            "facets": [
-                                "taxonomies.sale_result.name",
-                                "taxonomies.auction_tax.name",
-                                "taxonomies.lot_type.name",
-                                "taxonomies.collection_tax.name",
-                                "taxonomies.lot_year.name",
-                                "taxonomies.make.name",
-                                "taxonomies.model.name",
-                                "taxonomies.body_type.name",
-                                "color_meta",
-                                "interior_meta",
-                                "engine_configuration_meta",
-                                "transmission_type_meta",
-                                "taxonomies.run_date.timestamp"
-                            ],
-                            "filters": "",
-                            "highlightPostTag": "__/ais-highlight__",
-                            "highlightPreTag": "__ais-highlight__",
-                            "hitsPerPage": 96,
-                            "maxValuesPerFacet": 50,
-                            "page": 0,
-                            "query": "",
-                            "tagFilters": ""
-                        },
-                        {
-                            "indexName": "wp_posts_lot_feature_sort_asc",
-                            "params": "analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filters=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&hitsPerPage=0&maxValuesPerFacet=50&page=0&query="
-                        }
-                    ]
-                }
-            self.extract(payload, page)
+            try:
+                payload = json.dumps({
+                        "requests": [
+                            {
+                                "indexName": "wp_posts_lot_feature_sort_asc",
+                                "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A+{parse.quote(auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
+                                "facets": [
+                                    "taxonomies.sale_result.name",
+                                    "taxonomies.auction_tax.name",
+                                    "taxonomies.lot_type.name",
+                                    "taxonomies.collection_tax.name",
+                                    "taxonomies.lot_year.name",
+                                    "taxonomies.make.name",
+                                    "taxonomies.model.name",
+                                    "taxonomies.body_type.name",
+                                    "color_meta",
+                                    "interior_meta",
+                                    "engine_configuration_meta",
+                                    "transmission_type_meta",
+                                    "taxonomies.run_date.timestamp"
+                                ],
+                                "filters": "",
+                                "highlightPostTag": "__/ais-highlight__",
+                                "highlightPreTag": "__ais-highlight__",
+                                "hitsPerPage": 96,
+                                "maxValuesPerFacet": 50,
+                                "page": 0,
+                                "query": "",
+                                "tagFilters": ""
+                            },
+                            {
+                                "indexName": "wp_posts_lot_feature_sort_asc",
+                                "params": "analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filters=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&hitsPerPage=0&maxValuesPerFacet=50&page=0&query="
+                            }
+                        ]
+                    })
+
+                response = self.session.post('https://u6cfcq7v52-1.algolianet.com/1/indexes/*/queries?x-alg'
+                                        'olia-agent=Algolia%20for%20JavaScript%20(4.17.0)%3B%20Browser'
+                                        '%20(lite)%3B%20instantsearch.js%20(4.55.0)%3B%20react%20(18.2'
+                                        '.0)%3B%20react-instantsearch%20(6.38.1)%3B%20react-instantsea'
+                                        'rch-hooks%20(6.38.1)%3B%20JS%20Helper%20(3.12.0)&x-algolia-ap'
+                                        'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
+                                        'id=U6CFCQ7V52', headers=auction_data_headers,
+                                        data=payload,
+                                        timeout=10)
+                print(payload)
+            except Exception:
+                print(Exception)
+                import traceback
+                traceback.print_exc()
+                break
 
 
-    def extract(self,details, page_number):
-        try:
-            details = json.dumps(details)
-            response = self.session.post('https://u6cfcq7v52-1.algolianet.com/1/indexes/*/queries?x-alg'
-                                    'olia-agent=Algolia%20for%20JavaScript%20(4.17.0)%3B%20Browser'
-                                    '%20(lite)%3B%20instantsearch.js%20(4.55.0)%3B%20react%20(18.2'
-                                    '.0)%3B%20react-instantsearch%20(6.38.1)%3B%20react-instantsea'
-                                    'rch-hooks%20(6.38.1)%3B%20JS%20Helper%20(3.12.0)&x-algolia-ap'
-                                    'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
-                                    'id=U6CFCQ7V52', headers=auction_data_headers,
-                                    data=details,
-                                    timeout=10)
-            print(data)
-            sys.exit()
-        except Exception:
-            print(Exception)
-            import traceback
-            traceback.print_exc()
-
-        try:
             master_data = response.json()['results'][0]['hits']
-        except (IndexError, TypeError):
-            pass
-
 
             if master_data:
                 for data in master_data:
@@ -143,75 +135,75 @@ class MecumAuctions:
 
                         try:
                             vehicle_type = data['post_type_label'] if 'post_type_label' in data else ""
-                        except (IndexError, TypeError):
+                        except:
                             vehicle_type = ""
 
                         try:
                             item = data['post_title'] if 'post_title' in data else ""
-                        except (IndexError, TypeError):
+                        except:
                             item = ""
 
                         try:
                             sale_date = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
-                                            if 'post_date_formatted' in data else "")
-                        except (IndexError, TypeError):
+                                         if 'post_date_formatted' in data else "")
+                        except:
                             sale_date = ""
 
                         try:
                             sale_time = (datetime.fromtimestamp(int(data['post_date'])).strftime('%H:%M:%S')
                                 if 'post_date' in data else "")
-                        except (IndexError, TypeError):
+                        except:
                             sale_time = ""
 
                         try:
                             day_of_week = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
-                                            .strftime('%A') if 'post_date_formatted' in data else "")
-                        except (IndexError, TypeError):
+                                           .strftime('%A') if 'post_date_formatted' in data else "")
+                        except:
                             day_of_week = ""
 
                         try:
                             color = data['color_meta'] if 'color_meta' in data else ""
-                        except (IndexError, TypeError):
+                        except:
                             color = ""
 
                         try:
                             body_style = (data['taxonomies']['body_type'][0]['name']
                                             if 'body_type' in data['taxonomies'] else "")
-                        except (IndexError, TypeError):
+                        except:
                             body_style =""
 
                         try:
                             engine = (data['engine_configuration_meta']
                                 if 'engine_configuration_meta' in data else "")
-                        except (IndexError, TypeError):
+                        except:
                             engine = ""
 
                         try:
                             lot_number = data['lot_number_meta'] if 'lot_number_meta' in data else ""
-                        except (IndexError, TypeError):
+                        except:
                             lot_number = ""
 
                         try:
                             year = (data['taxonomies']['lot_year'][0]['name']
                                 if 'lot_year' in data['taxonomies'] else "")
-                        except (IndexError, TypeError):
+                        except:
                             year = ""
 
                         try:
                             est_retail_value = (data['high_estimate_meta'] if 'high_estimate_meta'
                                                 in data else "")
-                        except (IndexError, TypeError):
+                        except:
                             est_retail_value = ""
 
                         try:
                             transmission = (data['transmission_type_meta'] if 'transmission_type_meta'
                                             in data else "")
-                        except (IndexError, TypeError):
+                        except:
                             transmission = ""
 
                         try:
                             sale_status = data['status_ranking'] if 'status_ranking' in data else ""
-                        except (IndexError, TypeError):
+                        except:
                             sale_status = ""
                         yard_number = ""
                         yard_name = ""
@@ -220,7 +212,7 @@ class MecumAuctions:
                             if 'make' in data['taxonomies'] and data['taxonomies']['make']:
                                 make = (data[
                                     'taxonomies']['make'][0]['name'])
-                        except (IndexError, TypeError):
+                        except:
                             make = ""
 
                         model_group = ""
@@ -229,19 +221,19 @@ class MecumAuctions:
                             if 'model' in data['taxonomies'] and data['taxonomies']['model']:
                                 model_detail = (data[
                                     'taxonomies']['model'][0]['name'])
-                        except (IndexError, TypeError):
+                        except:
                             model_detail = ""
 
                         try:
                             vin = vin if vin is not None else ""
-                        except (IndexError, TypeError):
+                        except:
                             vin = ""
                         currency_code = "$"
 
                         try:
                             image_url = [image['url'] for image in data.get('images_meta', [])] if data.get('images_meta') else ""
                             image_urls = ",".join(image_url)
-                        except (IndexError, TypeError):
+                        except:
                             image_urls = ""
 
                         damage_description = secondary_damage = sale_title_state =\
@@ -267,9 +259,10 @@ class MecumAuctions:
                             writer.writerow(data)
                     except Exception as e:
                         print(e)
-
-        print(f"Page scraped till: {page_number}")
-        page_number += 1
+            else:
+                break
+            print(f"Page scraped till: {page}")
+            page += 1
 
     def get_vin(self, item_url):
         item_page = self.session.get(f"https://www.mecum.com{item_url}",
