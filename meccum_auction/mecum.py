@@ -56,9 +56,9 @@ class MecumAuctions:
         for auc in auctions_data:
             auc_title = auc['node']['title']
             auc_start_date = datetime.strptime(auc['node']['auctionFields']['auctionStartDate'],
-                                               '%B %d, %Y') + timedelta(hours=5.5)
+                                               '%B %d, %Y') + timedelta(hours=2)
             auc_end_date = datetime.strptime(auc['node']['auctionFields']['auctionEndDate'],
-                                             '%B %d, %Y') + timedelta(hours=5.5)
+                                             '%B %d, %Y') + timedelta(hours=2)
             auc_string = f"{auc_title}|{int(time.mktime(auc_start_date.timetuple()))}|" \
                          f"{int(time.mktime(auc_end_date.timetuple()))}"
             auctions_names.append(auc_string)
