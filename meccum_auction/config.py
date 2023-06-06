@@ -70,3 +70,4 @@ headers = ['yard_number', 'yard_name', 'sale_date', 'day_of_week', 'sale_time', 
             'location_country', 'currency_code', 'image_thumbnail', 'create_date_time', 'grid_row',
             'make_an_offer_eligible', 'buy_it_now_price', 'image_url', 'trim', 'last_updated_time', 'rentals',
             'copart_select', 'source', 'Timestamp']
+

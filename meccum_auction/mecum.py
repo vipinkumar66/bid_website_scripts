@@ -6,6 +6,7 @@ from urllib import parse
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 import csv
+import json
 import requests
 from bs4 import BeautifulSoup as bs
 from config import (folder_name, auction_url,
@@ -69,20 +70,41 @@ class MecumAuctions:
         run_loop = True
         while run_loop:
             try:
-                data = '{"requests":[{"indexName":"wp_posts_lot_feature_sort_asc","params":"facetFil' \
-                    'ters=%5B%5B%22taxonomies.auction_tax.name%3A' + parse.quote(auction_name, encoding="utf-8", safe=":/")+ \
-                    '%22%5D%5D&facets=%5B%22taxonomies.sale_result.name%22%2C%22taxonomies.auction' \
-                    '_tax.name%22%2C%22taxonomies.lot_type.name%22%2C%22taxonomies.collection_tax.' \
-                    'name%22%2C%22taxonomies.lot_year.name%22%2C%22taxonomies.make.name%22%2C%22ta' \
-                    'xonomies.model.name%22%2C%22taxonomies.body_type.name%22%2C%22color_meta%22%2' \
-                    'C%22interior_meta%22%2C%22engine_configuration_meta%22%2C%22transmission_type' \
-                    '_meta%22%2C%22taxonomies.run_date.timestamp%22%5D&filters=&highlightPostTag=_' \
-                    '_%2Fais-highlight__&highlightPreTag=__ais-highlight__&hitsPerPage=96&maxValue' \
-                    'sPerFacet=50&page=' + str(page) + \
-                    '&query=&tagFilters="},{"indexName":"wp_posts_lot_feature_sort_asc","params":"' \
-                    'analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filte' \
-                    'rs=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&h' \
-                    'itsPerPage=0&maxValuesPerFacet=50&page=0&query="}]}'
+                payload = json.dumps({
+                        "requests": [
+                            {
+                                "indexName": "wp_posts_lot_feature_sort_asc",
+                                "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A+{parse.quote(auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
+                                "facets": [
+                                    "taxonomies.sale_result.name",
+                                    "taxonomies.auction_tax.name",
+                                    "taxonomies.lot_type.name",
+                                    "taxonomies.collection_tax.name",
+                                    "taxonomies.lot_year.name",
+                                    "taxonomies.make.name",
+                                    "taxonomies.model.name",
+                                    "taxonomies.body_type.name",
+                                    "color_meta",
+                                    "interior_meta",
+                                    "engine_configuration_meta",
+                                    "transmission_type_meta",
+                                    "taxonomies.run_date.timestamp"
+                                ],
+                                "filters": "",
+                                "highlightPostTag": "__/ais-highlight__",
+                                "highlightPreTag": "__ais-highlight__",
+                                "hitsPerPage": 96,
+                                "maxValuesPerFacet": 50,
+                                "page": 0,
+                                "query": "",
+                                "tagFilters": ""
+                            },
+                            {
+                                "indexName": "wp_posts_lot_feature_sort_asc",
+                                "params": "analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filters=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&hitsPerPage=0&maxValuesPerFacet=50&page=0&query="
+                            }
+                        ]
+                    })
 
                 response = self.session.post('https://u6cfcq7v52-1.algolianet.com/1/indexes/*/queries?x-alg'
                                         'olia-agent=Algolia%20for%20JavaScript%20(4.17.0)%3B%20Browser'
@@ -91,8 +113,9 @@ class MecumAuctions:
                                         'rch-hooks%20(6.38.1)%3B%20JS%20Helper%20(3.12.0)&x-algolia-ap'
                                         'i-key=0291c46cde807bcb428a021a96138fcb&x-algolia-application-'
                                         'id=U6CFCQ7V52', headers=auction_data_headers,
-                                        data=data,
+                                        data=payload,
                                         timeout=10)
+                print(response.content)
             except Exception:
                 print(Exception)
                 import traceback
