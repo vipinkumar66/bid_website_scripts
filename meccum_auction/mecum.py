@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 import csv
 import json
+import sys
 import requests
 from bs4 import BeautifulSoup as bs
 from config import (folder_name, auction_url,
@@ -119,148 +120,153 @@ class MecumAuctions:
                                     'id=U6CFCQ7V52', headers=auction_data_headers,
                                     data=details,
                                     timeout=10)
-            print(response.content)
+            print(data)
+            sys.exit()
         except Exception:
             print(Exception)
             import traceback
             traceback.print_exc()
 
-        master_data = response.json()['results'][0]['hits']
+        try:
+            master_data = response.json()['results'][0]['hits']
+        except (IndexError, TypeError):
+            pass
 
-        if master_data:
-            for data in master_data:
-                try:
 
-                    item_url = data.get('permalink', "")
-                    if item_url:
-                        vin = self.get_vin(item_url)
-
+            if master_data:
+                for data in master_data:
                     try:
-                        vehicle_type = data['post_type_label'] if 'post_type_label' in data else ""
-                    except:
-                        vehicle_type = ""
 
-                    try:
-                        item = data['post_title'] if 'post_title' in data else ""
-                    except:
-                        item = ""
+                        item_url = data.get('permalink', "")
+                        if item_url:
+                            vin = self.get_vin(item_url)
 
-                    try:
-                        sale_date = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
-                                        if 'post_date_formatted' in data else "")
-                    except:
-                        sale_date = ""
+                        try:
+                            vehicle_type = data['post_type_label'] if 'post_type_label' in data else ""
+                        except (IndexError, TypeError):
+                            vehicle_type = ""
 
-                    try:
-                        sale_time = (datetime.fromtimestamp(int(data['post_date'])).strftime('%H:%M:%S')
-                            if 'post_date' in data else "")
-                    except:
-                        sale_time = ""
+                        try:
+                            item = data['post_title'] if 'post_title' in data else ""
+                        except (IndexError, TypeError):
+                            item = ""
 
-                    try:
-                        day_of_week = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
-                                        .strftime('%A') if 'post_date_formatted' in data else "")
-                    except:
-                        day_of_week = ""
+                        try:
+                            sale_date = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
+                                            if 'post_date_formatted' in data else "")
+                        except (IndexError, TypeError):
+                            sale_date = ""
 
-                    try:
-                        color = data['color_meta'] if 'color_meta' in data else ""
-                    except:
-                        color = ""
+                        try:
+                            sale_time = (datetime.fromtimestamp(int(data['post_date'])).strftime('%H:%M:%S')
+                                if 'post_date' in data else "")
+                        except (IndexError, TypeError):
+                            sale_time = ""
 
-                    try:
-                        body_style = (data['taxonomies']['body_type'][0]['name']
-                                        if 'body_type' in data['taxonomies'] else "")
-                    except:
-                        body_style =""
+                        try:
+                            day_of_week = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
+                                            .strftime('%A') if 'post_date_formatted' in data else "")
+                        except (IndexError, TypeError):
+                            day_of_week = ""
 
-                    try:
-                        engine = (data['engine_configuration_meta']
-                            if 'engine_configuration_meta' in data else "")
-                    except:
-                        engine = ""
+                        try:
+                            color = data['color_meta'] if 'color_meta' in data else ""
+                        except (IndexError, TypeError):
+                            color = ""
 
-                    try:
-                        lot_number = data['lot_number_meta'] if 'lot_number_meta' in data else ""
-                    except:
-                        lot_number = ""
+                        try:
+                            body_style = (data['taxonomies']['body_type'][0]['name']
+                                            if 'body_type' in data['taxonomies'] else "")
+                        except (IndexError, TypeError):
+                            body_style =""
 
-                    try:
-                        year = (data['taxonomies']['lot_year'][0]['name']
-                            if 'lot_year' in data['taxonomies'] else "")
-                    except:
-                        year = ""
+                        try:
+                            engine = (data['engine_configuration_meta']
+                                if 'engine_configuration_meta' in data else "")
+                        except (IndexError, TypeError):
+                            engine = ""
 
-                    try:
-                        est_retail_value = (data['high_estimate_meta'] if 'high_estimate_meta'
+                        try:
+                            lot_number = data['lot_number_meta'] if 'lot_number_meta' in data else ""
+                        except (IndexError, TypeError):
+                            lot_number = ""
+
+                        try:
+                            year = (data['taxonomies']['lot_year'][0]['name']
+                                if 'lot_year' in data['taxonomies'] else "")
+                        except (IndexError, TypeError):
+                            year = ""
+
+                        try:
+                            est_retail_value = (data['high_estimate_meta'] if 'high_estimate_meta'
+                                                in data else "")
+                        except (IndexError, TypeError):
+                            est_retail_value = ""
+
+                        try:
+                            transmission = (data['transmission_type_meta'] if 'transmission_type_meta'
                                             in data else "")
-                    except:
-                        est_retail_value = ""
+                        except (IndexError, TypeError):
+                            transmission = ""
 
-                    try:
-                        transmission = (data['transmission_type_meta'] if 'transmission_type_meta'
-                                        in data else "")
-                    except:
-                        transmission = ""
+                        try:
+                            sale_status = data['status_ranking'] if 'status_ranking' in data else ""
+                        except (IndexError, TypeError):
+                            sale_status = ""
+                        yard_number = ""
+                        yard_name = ""
+                        time_zone = ""
+                        try:
+                            if 'make' in data['taxonomies'] and data['taxonomies']['make']:
+                                make = (data[
+                                    'taxonomies']['make'][0]['name'])
+                        except (IndexError, TypeError):
+                            make = ""
 
-                    try:
-                        sale_status = data['status_ranking'] if 'status_ranking' in data else ""
-                    except:
-                        sale_status = ""
-                    yard_number = ""
-                    yard_name = ""
-                    time_zone = ""
-                    try:
-                        if 'make' in data['taxonomies'] and data['taxonomies']['make']:
-                            make = (data[
-                                'taxonomies']['make'][0]['name'])
-                    except:
-                        make = ""
+                        model_group = ""
 
-                    model_group = ""
+                        try:
+                            if 'model' in data['taxonomies'] and data['taxonomies']['model']:
+                                model_detail = (data[
+                                    'taxonomies']['model'][0]['name'])
+                        except (IndexError, TypeError):
+                            model_detail = ""
 
-                    try:
-                        if 'model' in data['taxonomies'] and data['taxonomies']['model']:
-                            model_detail = (data[
-                                'taxonomies']['model'][0]['name'])
-                    except:
-                        model_detail = ""
+                        try:
+                            vin = vin if vin is not None else ""
+                        except (IndexError, TypeError):
+                            vin = ""
+                        currency_code = "$"
 
-                    try:
-                        vin = vin if vin is not None else ""
-                    except:
-                        vin = ""
-                    currency_code = "$"
+                        try:
+                            image_url = [image['url'] for image in data.get('images_meta', [])] if data.get('images_meta') else ""
+                            image_urls = ",".join(image_url)
+                        except (IndexError, TypeError):
+                            image_urls = ""
 
-                    try:
-                        image_url = [image['url'] for image in data.get('images_meta', [])] if data.get('images_meta') else ""
-                        image_urls = ",".join(image_url)
-                    except:
-                        image_urls = ""
+                        damage_description = secondary_damage = sale_title_state =\
+                        sale_title_type = has_keys = lot_cond_code = vin =\
+                        odometer = odometer_brand = repair_cost = drive = fuel_type = \
+                        cylinders = runs_drives = high_bid_non_vix_sealed_vix = \
+                        special_note = location_city = location_state = location_zip5 = \
+                        location_zip4 = location_country = image_thumbnail = create_date_time = \
+                        grid_row = make_an_offer_eligible = buy_it_now_price = trim = \
+                        last_updated_time = rentals = copart_select = source = ""
 
-                    damage_description = secondary_damage = sale_title_state =\
-                    sale_title_type = has_keys = lot_cond_code = vin =\
-                    odometer = odometer_brand = repair_cost = drive = fuel_type = \
-                    cylinders = runs_drives = high_bid_non_vix_sealed_vix = \
-                    special_note = location_city = location_state = location_zip5 = \
-                    location_zip4 = location_country = image_thumbnail = create_date_time = \
-                    grid_row = make_an_offer_eligible = buy_it_now_price = trim = \
-                    last_updated_time = rentals = copart_select = source = ""
+                        data = [yard_number, yard_name, sale_date, day_of_week, sale_time, time_zone, item, lot_number,
+                        vehicle_type, year, make, model_detail, model_group, body_style, color, damage_description,
+                        secondary_damage, sale_title_state, sale_title_type, has_keys, lot_cond_code, vin, odometer,
+                        odometer_brand, est_retail_value, repair_cost, engine, drive, transmission,
+                        fuel_type, cylinders, runs_drives, sale_status, high_bid_non_vix_sealed_vix, special_note,
+                        location_city, location_state, location_zip5, location_zip4, location_country, currency_code,
+                        image_thumbnail, create_date_time, grid_row, make_an_offer_eligible, buy_it_now_price, image_urls, trim,
+                        last_updated_time, rentals, copart_select, source]
 
-                    data = [yard_number, yard_name, sale_date, day_of_week, sale_time, time_zone, item, lot_number,
-                    vehicle_type, year, make, model_detail, model_group, body_style, color, damage_description,
-                    secondary_damage, sale_title_state, sale_title_type, has_keys, lot_cond_code, vin, odometer,
-                    odometer_brand, est_retail_value, repair_cost, engine, drive, transmission,
-                    fuel_type, cylinders, runs_drives, sale_status, high_bid_non_vix_sealed_vix, special_note,
-                    location_city, location_state, location_zip5, location_zip4, location_country, currency_code,
-                    image_thumbnail, create_date_time, grid_row, make_an_offer_eligible, buy_it_now_price, image_urls, trim,
-                    last_updated_time, rentals, copart_select, source]
-
-                    with open(f"{folder_name}/meccum_data.csv", "a", newline="", encoding="utf-8") as file:
-                        writer = csv.writer(file)
-                        writer.writerow(data)
-                except Exception as e:
-                    print(e)
+                        with open(f"{folder_name}/meccum_data.csv", "a", newline="", encoding="utf-8") as file:
+                            writer = csv.writer(file)
+                            writer.writerow(data)
+                    except Exception as e:
+                        print(e)
 
         print(f"Page scraped till: {page_number}")
         page_number += 1
