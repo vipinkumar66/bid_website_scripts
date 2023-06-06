@@ -74,7 +74,7 @@ class MecumAuctions:
                         "requests": [
                             {
                                 "indexName": "wp_posts_lot_feature_sort_asc",
-                                "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A+{parse.quote(auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
+                                "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A{parse.quote_plus(auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
                                 "facets": [
                                     "taxonomies.sale_result.name",
                                     "taxonomies.auction_tax.name",
