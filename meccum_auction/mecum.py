@@ -74,7 +74,8 @@ class MecumAuctions:
                         "requests": [
                             {
                                 "indexName": "wp_posts_lot_feature_sort_asc",
-                                "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A{parse.quote(auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
+                                "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A{parse.quote(
+                                    auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
                                 "facets": [
                                     "taxonomies.sale_result.name",
                                     "taxonomies.auction_tax.name",
@@ -101,7 +102,9 @@ class MecumAuctions:
                             },
                             {
                                 "indexName": "wp_posts_lot_feature_sort_asc",
-                                "params": "analytics=false&clickAnalytics=false&facets=taxonomies.auction_tax.name&filters=&highlightPostTag=__%2Fais-highlight__&highlightPreTag=__ais-highlight__&hitsPerPage=0&maxValuesPerFacet=50&page=0&query="
+                                "params": "analytics=false&clickAnalytics=false&facets=taxonomies.auction"
+                                        "_tax.name&filters=&highlightPostTag=__%2Fais-highlight__&highlightPreTag="
+                                        "__ais-highlight__&hitsPerPage=0&maxValuesPerFacet=50&page=0&query="
                             }
                         ]
                     })
@@ -134,75 +137,75 @@ class MecumAuctions:
 
                         try:
                             vehicle_type = data['post_type_label'] if 'post_type_label' in data else ""
-                        except:
+                        except (TypeError, IndexError):
                             vehicle_type = ""
 
                         try:
                             item = data['post_title'] if 'post_title' in data else ""
-                        except:
+                        except (TypeError, IndexError):
                             item = ""
 
                         try:
                             sale_date = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
                                          if 'post_date_formatted' in data else "")
-                        except:
+                        except (TypeError, IndexError):
                             sale_date = ""
 
                         try:
                             sale_time = (datetime.fromtimestamp(int(data['post_date'])).strftime('%H:%M:%S')
                                 if 'post_date' in data else "")
-                        except:
+                        except (TypeError, IndexError):
                             sale_time = ""
 
                         try:
                             day_of_week = (datetime.strptime(data['post_date_formatted'], '%B %d, %Y')
                                            .strftime('%A') if 'post_date_formatted' in data else "")
-                        except:
+                        except (TypeError, IndexError):
                             day_of_week = ""
 
                         try:
                             color = data['color_meta'] if 'color_meta' in data else ""
-                        except:
+                        except (TypeError, IndexError):
                             color = ""
 
                         try:
                             body_style = (data['taxonomies']['body_type'][0]['name']
                                             if 'body_type' in data['taxonomies'] else "")
-                        except:
+                        except (TypeError, IndexError):
                             body_style =""
 
                         try:
                             engine = (data['engine_configuration_meta']
                                 if 'engine_configuration_meta' in data else "")
-                        except:
+                        except (TypeError, IndexError):
                             engine = ""
 
                         try:
                             lot_number = data['lot_number_meta'] if 'lot_number_meta' in data else ""
-                        except:
+                        except (TypeError, IndexError):
                             lot_number = ""
 
                         try:
                             year = (data['taxonomies']['lot_year'][0]['name']
                                 if 'lot_year' in data['taxonomies'] else "")
-                        except:
+                        except (TypeError, IndexError):
                             year = ""
 
                         try:
                             est_retail_value = (data['high_estimate_meta'] if 'high_estimate_meta'
                                                 in data else "")
-                        except:
+                        except (TypeError, IndexError):
                             est_retail_value = ""
 
                         try:
                             transmission = (data['transmission_type_meta'] if 'transmission_type_meta'
                                             in data else "")
-                        except:
+                        except (TypeError, IndexError):
                             transmission = ""
 
                         try:
                             sale_status = data['status_ranking'] if 'status_ranking' in data else ""
-                        except:
+                        except (TypeError, IndexError):
                             sale_status = ""
                         yard_number = ""
                         yard_name = ""
@@ -211,7 +214,7 @@ class MecumAuctions:
                             if 'make' in data['taxonomies'] and data['taxonomies']['make']:
                                 make = (data[
                                     'taxonomies']['make'][0]['name'])
-                        except:
+                        except (TypeError, IndexError):
                             make = ""
 
                         model_group = ""
@@ -220,19 +223,19 @@ class MecumAuctions:
                             if 'model' in data['taxonomies'] and data['taxonomies']['model']:
                                 model_detail = (data[
                                     'taxonomies']['model'][0]['name'])
-                        except:
+                        except (TypeError, IndexError):
                             model_detail = ""
 
                         try:
                             vin = vin if vin is not None else ""
-                        except:
+                        except (TypeError, IndexError):
                             vin = ""
                         currency_code = "$"
 
                         try:
                             image_url = [image['url'] for image in data.get('images_meta', [])] if data.get('images_meta') else ""
                             image_urls = ",".join(image_url)
-                        except:
+                        except (TypeError, IndexError):
                             image_urls = ""
 
                         damage_description = secondary_damage = sale_title_state =\
