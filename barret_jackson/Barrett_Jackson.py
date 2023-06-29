@@ -92,9 +92,12 @@ class BarrettJacksonScraper:
             collector_car = i.find_all('div', class_='span4')[1].find('a')['href']
             id_founder = collector_car.split('/')[6:]
             id_for_page = '-'.join(id_founder)
-            pattern = r"\b2023\b"
+            today = datetime.datetime.today()
+            month = today.strftime('%m')
+            pattern = r"\b{}-(\d{{1,2}})-2023\b".format(month)
             match = re.search(pattern, id_for_page)
             if match:
+                print(id_for_page)
                 url = f"https://barrettjacksoncdn.azureedge.net/staging/Content/Pages/Inventory/{id_for_page}.html"
                 all_main_links.append(url)
             else:
@@ -128,104 +131,108 @@ class BarrettJacksonScraper:
         """
         Collect details from each card.
         """
-        id_for_car = link.split('/')[-1].split('-')[-1]
+        print("we here")
+        try:
+            id_for_car = link.split('/')[-1].split('-')[-1]
 
-        response = requests.get(
-            f"https://barrettjacksoncdn.azureedge.net/staging/Content/Pages/InventoryDetails/{id_for_car}.html",
-            timeout=10)
-        soup = BeautifulSoup(response.text, 'html.parser')
+            response = requests.get(
+                f"https://barrettjacksoncdn.azureedge.net/staging/Content/Pages/InventoryDetails/{id_for_car}.html",
+                timeout=10)
+            soup = BeautifulSoup(response.text, 'html.parser')
 
-        price_input = soup.find('input', id='hiddenprice')
-        if price_input:
-            price_value = price_input['value']
-        else:
-            price_span = soup.find('span', id='Price')
-            price_value = price_span.text if price_span else ''
+            price_input = soup.find('input', id='hiddenprice')
+            if price_input:
+                price_value = price_input['value']
+            else:
+                price_span = soup.find('span', id='Price')
+                price_value = price_span.text if price_span else ''
 
-        price_match = re.search(r'\$(\d{1,3}(?:,\d{3})*\.\d{2})', price_value)
-        price = price_match.group(1) if price_match else ''
+            price_match = re.search(r'\$(\d{1,3}(?:,\d{3})*\.\d{2})', price_value)
+            price = price_match.group(1) if price_match else ''
 
-        image_url = [i.find('img')['src'] for i in soup.find('div', class_='bj-car-carousel-items')]
-        image = ' , '.join(image_url)
+            image_url = [i.find('img')['src'] for i in soup.find('div', class_='bj-car-carousel-items')]
+            image = ' , '.join(image_url)
 
-        details = {
-            'id': id_for_car,
-            'yard_number': '',
-            'yard_name': '',
-            'sale_date': '',
-            'day_of_week': '',
-            'sale_time': '',
-            'time_zone': '',
-            'item': name,
-            'lot_number': soup.find('span', id='Lot').text if
-            soup.find('span', id='Lot') else '',
-            'vehicle_type': '',
-            'year': soup.find('span', id='Year').text if
-            soup.find('span', id='Year') else '',
-            'make': soup.find('span', id='Make').text if
-            soup.find('span', id='Make') else '',
-            'model_group': '',
-            'model_detail': soup.find('span', id='Model').text if
-            soup.find('span', id='Model') else '',
-            'body_style': soup.find('span', id='Style').text if
-            soup.find('span', id='Style') else '',
-            'color': soup.find('span', id='Exterior Color').text if
-            soup.find('span', id='Exterior Color') else '',
-            'damage_description':'',
-            'secondary_damage':'',
-            'sale_title_state':'',
-            'sale_title_type':'',
-            'has_keys':'',
-            'lot_cond_code':'',
-            'vin': f"{soup.find('span', id='VIN').text}".strip() if
-            soup.find('span', id='VIN') else '',
-            'odometer':'',
-            'odometer_brand':'',
-            'est_retail_value':'',
-            'repair_cost':'',
-            'engine': soup.find('span', id='Engine Size').text if
-            soup.find('span', id='Engine Size') else '',
-            'drive': '',
-            'transmission': soup.find('span', id='Transmission').text if
-            soup.find('span', id='Transmission') else '',
-            'fuel_type': '',
-            'cylinders': soup.find('span', id='Cylinders').text if
-            soup.find('span', id='Cylinders') else '',
-            'runs_drives':'',
-            'sale_status':'',
-            'high_bid_non_vix_sealed_vix':'',
-            'special_note':'',
-            'location_city':'',
-            'location_state':'',
-            'location_zip5':'',
-            'location_zip4':'',
-            'location_country':'',
-            'currency_code':'',
-            'image_thumbnail':image_url[0],
-            'create_date_time':'',
-            'grid_row':'',
-            'make_an_offer_eligible':'',
-            'buy_it_now_price': price,
-            'image_url': image,
-            'trim': '',
-            'last_updated_time': '',
-            'rentals': '',
-            'copart_select': '',
-            'source': '',
-            # 'link': link,
-            # 'auction': soup.find('span', id='Auction').text if
-            # soup.find('span', id='Auction') else '',
-            # 'reserve': soup.find('span', id='Reserve').text if
-            # soup.find('span', id='Reserve') else '',
-            # 'status': soup.find('span', id='Status').text if
-            # soup.find('span', id='Status') else '',
-            # 'interior_color': soup.find('span', id='Interior Color').text if
-            # soup.find('span', id='Interior Color') else '',
-            # 'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            details = {
+                'id': id_for_car,
+                'yard_number': '',
+                'yard_name': '',
+                'sale_date': '',
+                'day_of_week': '',
+                'sale_time': '',
+                'time_zone': '',
+                'item': name,
+                'lot_number': soup.find('span', id='Lot').text if
+                soup.find('span', id='Lot') else '',
+                'vehicle_type': '',
+                'year': soup.find('span', id='Year').text if
+                soup.find('span', id='Year') else '',
+                'make': soup.find('span', id='Make').text if
+                soup.find('span', id='Make') else '',
+                'model_group': '',
+                'model_detail': soup.find('span', id='Model').text if
+                soup.find('span', id='Model') else '',
+                'body_style': soup.find('span', id='Style').text if
+                soup.find('span', id='Style') else '',
+                'color': soup.find('span', id='Exterior Color').text if
+                soup.find('span', id='Exterior Color') else '',
+                'damage_description':'',
+                'secondary_damage':'',
+                'sale_title_state':'',
+                'sale_title_type':'',
+                'has_keys':'',
+                'lot_cond_code':'',
+                'vin': f"{soup.find('span', id='VIN').text}".strip() if
+                soup.find('span', id='VIN') else '',
+                'odometer':'',
+                'odometer_brand':'',
+                'est_retail_value':'',
+                'repair_cost':'',
+                'engine': soup.find('span', id='Engine Size').text if
+                soup.find('span', id='Engine Size') else '',
+                'drive': '',
+                'transmission': soup.find('span', id='Transmission').text if
+                soup.find('span', id='Transmission') else '',
+                'fuel_type': '',
+                'cylinders': soup.find('span', id='Cylinders').text if
+                soup.find('span', id='Cylinders') else '',
+                'runs_drives':'',
+                'sale_status':'',
+                'high_bid_non_vix_sealed_vix':'',
+                'special_note':'',
+                'location_city':'',
+                'location_state':'',
+                'location_zip5':'',
+                'location_zip4':'',
+                'location_country':'',
+                'currency_code':'',
+                'image_thumbnail':image_url[0],
+                'create_date_time':'',
+                'grid_row':'',
+                'make_an_offer_eligible':'',
+                'buy_it_now_price': price,
+                'image_url': image,
+                'trim': '',
+                'last_updated_time': '',
+                'rentals': '',
+                'copart_select': '',
+                'source': '',
+                # 'link': link,
+                # 'auction': soup.find('span', id='Auction').text if
+                # soup.find('span', id='Auction') else '',
+                # 'reserve': soup.find('span', id='Reserve').text if
+                # soup.find('span', id='Reserve') else '',
+                # 'status': soup.find('span', id='Status').text if
+                # soup.find('span', id='Status') else '',
+                # 'interior_color': soup.find('span', id='Interior Color').text if
+                # soup.find('span', id='Interior Color') else '',
+                # 'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
 
-        }
+            }
 
-        return details
+            return details
+        except Exception as e:
+            print(e)
 
     @staticmethod
     def execution_time(function):

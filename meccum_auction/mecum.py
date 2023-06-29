@@ -52,16 +52,22 @@ class MecumAuctions:
         auctions_response = requests.get(auction_url, timeout=10)
         auctions_data = auctions_response.json()['data']['auctions']['edges']
         auctions_names = []
+        today = datetime.today()
+        month_name = today.strftime('%B')
 
         for auc in auctions_data:
-            auc_title = auc['node']['title']
-            auc_start_date = datetime.strptime(auc['node']['auctionFields']['auctionStartDate'],
-                                               '%B %d, %Y') + timedelta(hours=3)
-            auc_end_date = datetime.strptime(auc['node']['auctionFields']['auctionEndDate'],
-                                             '%B %d, %Y') + timedelta(hours=3)
-            auc_string = f"{auc_title}|{int(time.mktime(auc_start_date.timetuple()))}|" \
-                         f"{int(time.mktime(auc_end_date.timetuple()))}"
-            auctions_names.append(auc_string)
+            if month_name in auc['node']['auctionFields']['auctionEndDate']:
+                auc_title = auc['node']['title']
+                auc_start_date = datetime.strptime(auc['node']['auctionFields']['auctionStartDate'],
+                                                '%B %d, %Y') + timedelta(hours=3)
+                auc_end_date = datetime.strptime(auc['node']['auctionFields']['auctionEndDate'],
+                                                '%B %d, %Y') + timedelta(hours=3)
+                auc_string = f"{auc_title}|{int(time.mktime(auc_start_date.timetuple()))}|" \
+                            f"{int(time.mktime(auc_end_date.timetuple()))}"
+                auctions_names.append(auc_string)
+            else:
+                pass
+        print(auctions_names)
         return auctions_names
 
     def get_auction_data(self, auction_name):
@@ -74,8 +80,7 @@ class MecumAuctions:
                         "requests": [
                             {
                                 "indexName": "wp_posts_lot_feature_sort_asc",
-                                "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A{parse.quote(
-                                    auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
+                                "params": f"facetFilters=%5B%5B%22taxonomies.auction_tax.name%3A{parse.quote(auction_name, encoding='utf-8', safe=':/')}%22%5D%5D",
                                 "facets": [
                                     "taxonomies.sale_result.name",
                                     "taxonomies.auction_tax.name",
