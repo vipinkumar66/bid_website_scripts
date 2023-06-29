@@ -1,4 +1,4 @@
-""""Module to extract the bids' data from Mecum Website"""
+"""Module to extract the bids' data from Mecum Website"""
 # Importing Required Libraries
 import time
 from functools import wraps
@@ -217,7 +217,7 @@ class MecumAuctions:
                         time_zone = ""
                         try:
                             if 'make' in data['taxonomies'] and data['taxonomies']['make']:
-                                make = (data[
+                                 make = (data[
                                     'taxonomies']['make'][0]['name'])
                         except (TypeError, IndexError):
                             make = ""
@@ -248,7 +248,7 @@ class MecumAuctions:
                         odometer = odometer_brand = repair_cost = drive = fuel_type = \
                         cylinders = runs_drives = high_bid_non_vix_sealed_vix = \
                         special_note = location_city = location_state = location_zip5 = \
-                        location_zip4 = location_country = image_thumbnail = create_date_time = \
+                             location_zip4 = location_country = image_thumbnail = create_date_time = \
                         grid_row = make_an_offer_eligible = buy_it_now_price = trim = \
                         last_updated_time = rentals = copart_select = source = ""
 
@@ -293,4 +293,3 @@ class MecumAuctions:
 if __name__ == "__main__":
     mecum_obj = MecumAuctions()
     mecum_obj.scrap_all_auctions_data()
-
