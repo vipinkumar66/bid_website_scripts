@@ -401,7 +401,7 @@ def parse_links(html):
     return {link.attributes["href"] for link in links} # here we are using set to delete duplicate elements
 
 
-def pagination_loop(client, max_page=35):
+def pagination_loop(client, max_page=20):
 
     """
     This function is used to pull all the page urls from the website.
