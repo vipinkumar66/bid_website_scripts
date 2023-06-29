@@ -411,8 +411,10 @@ def pagination_loop(client, max_page=35):
     max_page (int, optional): Maximum number of pages to fetch
 
     """
+    today = datetime.datetime.today()
+    formatted_date = today.strftime('%m-%d-%Y')
 
-    url = "https://sca.auction/en/search/year-2023-2023"
+    url = f"https://sca.auction/en/search/sale-date-{formatted_date}-to-{formatted_date}"
     all_products = []  # List to store products from all pages
     page_count = 0
     while True:
