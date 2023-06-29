@@ -81,7 +81,9 @@ class Abetter:
         Get all links of cars to get detail data
         :param page_no: pagination to get all page data
         """
-        response = requests.get(f'https://abetter.bid/en/car-finder/page-{page_no}',
+        today_date = datetime.today()
+        formatted_date = today_date.strftime("%m-%d-%Y")
+        response = requests.get(f'https://abetter.bid/en/car-finder/sale-date-{formatted_date}-to-{formatted_date}/page-{page_no}',
                                 headers=self.headers)
         soup = BeautifulSoup(response.content, 'html.parser')
         find_div = soup.find_all('div', class_='swiper-wrapper')
