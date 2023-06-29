@@ -25,8 +25,6 @@ class AutoGSA:
 
         today = datetime.now().date()
         self.formatted_end_date = today.strftime("%Y-%m-%d")
-        start_date = today - timedelta(days=30)
-        self.formatted_start_date = start_date.strftime("%Y-%m-%d")
 
     def set_chrome_options(self):
         """
@@ -62,7 +60,7 @@ class AutoGSA:
         self.driver.find_elements(By.CLASS_NAME, "vehicle_sub")[8].click()
         time.sleep(2)
 
-        self.driver.find_element(By.CSS_SELECTOR, "input[name='fromDate']").send_keys(self.formatted_start_date)
+        self.driver.find_element(By.CSS_SELECTOR, "input[name='fromDate']").send_keys(self.formatted_end_date )
         self.driver.find_element(By.CSS_SELECTOR, "input[name='toDate']").send_keys(self.formatted_end_date)
 
         # self.driver.find_element(By.ID, "checkUncheckVehicleType").click()

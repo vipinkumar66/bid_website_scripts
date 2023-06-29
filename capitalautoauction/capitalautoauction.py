@@ -159,6 +159,3 @@ if __name__ == "__main__":
         executor.map(obj.get_items_from_auctions, auction_list)
     obj.update_csv_headers()
 
-
-
-

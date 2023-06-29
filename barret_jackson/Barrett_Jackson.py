@@ -27,7 +27,7 @@ class BarrettJacksonScraper:
         self.inventory_url = inventory_url
 
         cwd = os.path.abspath(os.getcwd())
-        self.current_folder_path = os.path.join(cwd, 'Output_Folder', datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
+        self.current_folder_path = os.path.join(cwd, 'Output_Folder', datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
 
         if not os.path.exists(self.current_folder_path):
             os.makedirs(self.current_folder_path)
