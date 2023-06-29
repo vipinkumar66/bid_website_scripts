@@ -14,34 +14,9 @@ if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 
 
-auction_url = ('https://ignition.mecumauctions.com/graphql?query=query%20'
-                'GET_AUCTIONS_BY_META(%24first%3A%20Int%2C%20%24where%3A%2'
-                '0RootQueryToAuctionConnectionWhereArgs%2C%20%24hasPaginat'
-                'ion%3A%20Boolean%20%3D%20false)%20%7B%0A%20auctions(first'
-                '%3A%20%24first%2C%20where%3A%20%24where)%20%7B%0A%20pageI'
-                'nfo%20%40include(if%3A%20%24hasPagination)%20%7B%0A%20off'
-                'setPagination%20%7B%0A%20total%0A%20__typename%0A%20%7D%0'
-                'A%20__typename%0A%20%7D%0A%20edges%20%7B%0A%20node%20%7B%'
-                '0A%20id%0A%20auctionFields%20%7B%0A%20auctionStartDate%0A'
-                '%20auctionEndDate%0A%20auctionSubtitle%0A%20positionReque'
-                'stForm%20%7B%0A%20mediaItemUrl%0A%20__typename%0A%20%7D%0'
-                'A%20__typename%0A%20%7D%0A%20hasLots%0A%20registrationsCo'
-                'nsignments%20%7B%0A%20nodes%20%7B%0A%20slug%0A%20__typena'
-                'me%0A%20%7D%0A%20__typename%0A%20%7D%0A%20title%0A%20slug'
-                '%0A%20uri%0A%20featuredImage%20%7B%0A%20node%20%7B%0A%20a'
-                'ltText%0A%20mediaDetails%20%7B%0A%20height%0A%20width%0A%'
-                '20__typename%0A%20%7D%0A%20mediaItemUrl%0A%20__typename%0'
-                'A%20%7D%0A%20__typename%0A%20%7D%0A%20__typename%0A%20%7D'
-                '%0A%20__typename%0A%20%7D%0A%20__typename%0A%20%7D%0A%7D&'
-                'operationName=GET_AUCTIONS_BY_META&variables=%7B%22hasPag'
-                'ination%22%3Afalse%2C%22first%22%3A28%2C%22where%22%3A%7B'
-                '%22metaQuery%22%3A%7B%22metaArray%22%3A%5B%7B%22key%22%3A'
-                '%22auction_start_date%22%7D%2C%7B%22key%22%3A%22auction_e'
-                'nd_date%22%2C%22compare%22%3A%22GREATER_THAN_OR_EQUAL_TO%'
-                '22%2C%22value%22%3A%2220230513%22%2C%22type%22%3A%22DATE%'
-                '22%7D%5D%7D%2C%22orderby%22%3A%7B%22orderby%22%3A%7B%22fi'
-                'eld%22%3A%22AUCTION_START_DATE%22%2C%22order%22%3A%22ASC%'
-                '22%7D%7D%7D%7D')
+auction_url = (
+    'https://ignition.mecumauctions.com/graphql?query=query%20GET_AUCTIONS_BY_DATE(%24date%3A%20String!%2C%20%24first%3A%20Int)%20%7B%0A%20auctions(%0A%20first%3A%20%24first%0A%20where%3A%20%7BmetaQuery%3A%20%7BmetaArray%3A%20%5B%7Bkey%3A%20%22auction_start_date%22%7D%2C%20%7Bvalue%3A%20%24date%2C%20key%3A%20%22auction_end_date%22%2C%20compare%3A%20GREATER_THAN_OR_EQUAL_TO%2C%20type%3A%20DATE%7D%5D%7D%2C%20orderby%3A%20%7Bfield%3A%20AUCTION_START_DATE%2C%20order%3A%20ASC%7D%7D%0A%20)%20%7B%0A%20edges%20%7B%0A%20node%20%7B%0A%20id%0A%20auctionFields%20%7B%0A%20auctionStartDate%0A%20auctionEndDate%0A%20__typename%0A%20%7D%0A%20title%0A%20slug%0A%20uri%0A%20featuredImage%20%7B%0A%20node%20%7B%0A%20altText%0A%20mediaDetails%20%7B%0A%20height%0A%20width%0A%20__typename%0A%20%7D%0A%20mediaItemUrl%0A%20__typename%0A%20%7D%0A%20__typename%0A%20%7D%0A%20__typename%0A%20%7D%0A%20__typename%0A%20%7D%0A%20__typename%0A%20%7D%0A%7D&operationName=GET_AUCTIONS_BY_DATE&variables=%7B%22date%22%3A%2220230629%22%2C%22first%22%3A4%7D'
+    )
 
 auction_data_headers ={
                 'Accept': '*/*',
