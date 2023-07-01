@@ -4,6 +4,7 @@ Import Required Libraries
 import csv
 import json
 import os
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -74,23 +75,39 @@ class Abetter:
                  'copart_select', 'source', 'Timestamp']
             )
 
-            with ThreadPoolExecutor() as exe:
-                exe.map(self.get_all_links, range(1, 281))
+            self.get_all_links()
 
-    def get_all_links(self, page_no):
+    def get_all_links(self):
         """
         Get all links of cars to get detail data
         :param page_no: pagination to get all page data
         """
+
         today_date = datetime.today()
         formatted_date = today_date.strftime("%m-%d-%Y")
-        response = requests.get(f'https://abetter.bid/en/car-finder/sale-date-{formatted_date}-to-{formatted_date}/page-{page_no}',
-                                headers=self.headers)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        find_div = soup.find_all('div', class_='swiper-wrapper')
-        for one_div in find_div:
-            all_links.append(one_div.find('a').get('href'))
-        print(f"Total Links: {len(all_links)}")
+        run = True
+        page_no = 1
+        while run:
+            url = ('https://abetter.bid/en/car-finder/sale-date'
+                   f'-{formatted_date}-to-{formatted_date}/page-{page_no}')
+            response = requests.get(url=url, headers=self.headers)
+
+            soup = BeautifulSoup(response.content, 'html.parser')
+
+            try:
+                check_error = soup.find("div", class_="error").text.strip()
+            except:
+                check_error = ""
+
+            if check_error:
+                print("Sorry no data available")
+                run = False
+            else:
+                find_div = soup.find_all('div', class_='swiper-wrapper')
+                for one_div in find_div:
+                    all_links.append(one_div.find('a').get('href'))
+                print(f"Total Links: {len(all_links)}")
+                page_no+=1
 
     def get_response(self, link):
         """

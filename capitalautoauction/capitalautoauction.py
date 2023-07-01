@@ -1,6 +1,7 @@
 """Importing important libraries"""
 import csv
 import re
+import time
 from datetime import datetime
 import pandas as pd
 import requests
@@ -150,6 +151,8 @@ class CarsBids:
         df.to_csv(f"{folder_name}/data.csv", index=False)
 
 if __name__ == "__main__":
+    time1 = time.time()
+
     obj = CarsBids()
     with open(f"{folder_name}/data.csv", "w", newline="", encoding="utf_8") as csv_file:
         writer = csv.DictWriter(csv_file,fieldnames=csv_headers)
@@ -158,4 +161,6 @@ if __name__ == "__main__":
     with  ThreadPoolExecutor() as executor:
         executor.map(obj.get_items_from_auctions, auction_list)
     obj.update_csv_headers()
+
+    print(f"Run time of the script is {time1 - time.time()} seconds")
 
