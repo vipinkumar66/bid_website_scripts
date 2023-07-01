@@ -240,9 +240,14 @@ class CarsAndBids:
 
         return (image_thumbnail, images)
 
-obj = CarsAndBids()
-obj.create_empty_csv()
-obj.create_driver()
-obj.get_vehicle_url()
-obj.get_vehicle_data()
+if __name__ == "__main__":
+    time1 = time.time()
+
+    obj = CarsAndBids()
+    obj.create_empty_csv()
+    obj.create_driver()
+    obj.get_vehicle_url()
+    obj.get_vehicle_data()
+
+    print(f"Time Taken to get the data is {time1 - time.time()} seconds")
 
