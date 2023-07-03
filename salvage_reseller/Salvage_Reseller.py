@@ -28,7 +28,6 @@ class Salvage:
         self.all_url = set()
         self.count = 1
         self.result = []
-        self.today_date = datetime.datetime.now().strftime("%Y-%m-%d")
         self.user_agent = UserAgent()
 
 
@@ -39,7 +38,7 @@ class Salvage:
         params = {
             'page': self.page1,
         }
-        rurl = f"https://www.salvagereseller.com/cars-for-sale/sale-date/{self.today_date}"
+        rurl = "https://www.salvagereseller.com/quick-pick/selling-today"
         response = self.session.get( rurl, headers=headers, params=params, cookies=cookies,timeout=10 )
         soup = BeautifulSoup(response.content, "html.parser")
         tag = soup.find('ul', class_="pagination")
@@ -62,7 +61,7 @@ class Salvage:
                 'page': self.page1,
             }
             headers['User-Agent'] = self.user_agent.random
-            rurl = f"https://www.salvagereseller.com/cars-for-sale/sale-date/{self.today_date}"
+            rurl = "https://www.salvagereseller.com/quick-pick/selling-today"
 
             response = self.session.get( rurl, headers=headers, timeout=10, params=params, cookies=cookies )
             soup = BeautifulSoup(response.content, "lxml")
@@ -75,6 +74,7 @@ class Salvage:
                 result = urls.get('href')
                 self.all_url.add(result)
             self.page1 += 25
+            print(len(self.all_url))
         except Exception as e:
             print(f"exception is :{e}")
 
@@ -83,25 +83,11 @@ class Salvage:
         """This function is used to get all the
         information from each url and store it in dictionary"""
 
-        # max_attempt = 3
-        # retry_delay = 5  # Delay in seconds between retries
-
-        # session = requests.Session()
-        # retry = Retry(total=max_attempt, backoff_factor=0.5)
-        # adapter = HTTPAdapter(max_retries=retry)
-        # session.mount('http://', adapter)
-        # session.mount('https://', adapter)
-
         resp = self.session.get(p_url, headers=headers, timeout=10)
         resp.raise_for_status()  # Check for HTTP errors
 
         soup1 = BeautifulSoup(resp.content, 'html.parser')
-        # try:
-        #     div = soup1.find('div', text='Actual Cash Value:')
-        #     value_div = div.find_next_sibling('div')
-        #     value = value_div.text.strip()
-        # except (AttributeError, TypeError):
-        #     value = "NA"
+
         try:
             div20 = soup1.find('div', text='Sale Date:')
             value_div20 = div20.find_next_sibling('div')
@@ -349,7 +335,7 @@ if __name__ == '__main__':
         executor.map(obj.scrape_urls, range(1, pages+1))
 
     with ThreadPoolExecutor() as executor:
-        executor.map(obj.scrape_urls, obj.all_url)
+        executor.map(obj.cars_info, obj.all_url)
 
     print("Scrapped the urls")
     print(f'Time taken to scrape all {len(obj.to_url)} is : {time.time()-t1}s')
