@@ -7,11 +7,7 @@ import datetime
 import time
 import requests
 from bs4 import BeautifulSoup
-from lxml import etree
 import pandas as pd
-from requests.adapters import HTTPAdapter
-import urllib3
-from urllib3.util.retry import Retry
 from fake_useragent import UserAgent
 from concurrent.futures import ThreadPoolExecutor
 
@@ -29,11 +25,12 @@ class Salvage:
 
         self.session = requests.Session()
         self.page1 = 0
-        self.to_url = set()
+        self.all_url = set()
         self.count = 1
         self.result = []
         self.today_date = datetime.datetime.now().strftime("%Y-%m-%d")
         self.user_agent = UserAgent()
+
 
     def get_total_pages(self):
         """
@@ -52,6 +49,7 @@ class Salvage:
         last_page = int(total_cars)//25
         print(f"last_page = {last_page}")
         return last_page
+
 
     def scrape_urls(self, page_number):
         """
@@ -75,11 +73,11 @@ class Salvage:
                 pass
             for urls in href:
                 result = urls.get('href')
-                self.to_url.add(result)
+                self.all_url.add(result)
             self.page1 += 25
         except Exception as e:
             print(f"exception is :{e}")
-        print(f"total_urls: {len(self.to_url)}")
+
 
     def cars_info(self, p_url):
         """This function is used to get all the
@@ -341,6 +339,7 @@ class Salvage:
                 # If the file doesn't exist, create it and write the data
                 data_frame.to_csv(filename, index=False)
 
+
 if __name__ == '__main__':
     t1 = time.time()
     obj = Salvage()
@@ -350,7 +349,7 @@ if __name__ == '__main__':
         executor.map(obj.scrape_urls, range(1, pages+1))
 
     with ThreadPoolExecutor() as executor:
-            executor.map(obj.cars_info, obj.to_url)
+        executor.map(obj.scrape_urls, obj.all_url)
 
     print("Scrapped the urls")
     print(f'Time taken to scrape all {len(obj.to_url)} is : {time.time()-t1}s')
