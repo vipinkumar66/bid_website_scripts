@@ -58,7 +58,7 @@ class Salvage:
         This function is used to pull all the urls from
         the website and store in a list
         """
-        print(f'Scrapping page humber: {page_number}')
+        print(f'Scrapping page number: {page_number}')
         try:
             params = {
                 'page': self.page1,
@@ -67,9 +67,8 @@ class Salvage:
             rurl = f"https://www.salvagereseller.com/cars-for-sale/sale-date/{self.today_date}"
 
             response = self.session.get( rurl, headers=headers, timeout=10, params=params, cookies=cookies )
-            res = response.json()
-            lis = res['listing']
-            soup = BeautifulSoup(lis, 'html.parser')
+            soup = BeautifulSoup(response.content, "lxml")
+
             href = soup.select('div.my-4.vehicle-row.position-relative a.vehicle-model')
             if not href:
                 print("no href")
