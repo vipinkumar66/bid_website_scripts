@@ -7,122 +7,94 @@ import datetime
 import time
 import requests
 from bs4 import BeautifulSoup
+from lxml import etree
 import pandas as pd
 from requests.adapters import HTTPAdapter
 import urllib3
 from urllib3.util.retry import Retry
+from fake_useragent import UserAgent
+from concurrent.futures import ThreadPoolExecutor
 
-print(__doc__) # prints the functionlity of the module using doc string
+from constants import (headers, filename, cookies)
+
 
 class Salvage:
-    "This class is used to initialize page1, page2, to_url, count, result, cookies, headers values"
-    # Inorder to print the functionlity of the class using doc string print it outside the class
+    """
+    To scrap the data from salvage reseller website
+    """
     def __init__(self):
-        self.script_dir = os.path.dirname(os.path.abspath(__file__))
-        os.chdir(self.script_dir)
+        """
+        Initializing function
+        """
 
+        self.session = requests.Session()
         self.page1 = 0
-        self.page2 = 25
         self.to_url = set()
         self.count = 1
         self.result = []
+        self.today_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        self.user_agent = UserAgent()
 
-
-        self.headers = {
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'Pragma': 'no-cache',
-            'Referer': f'https://www.salvagereseller.com/cars-for-sale/type/automobiles/page/{self.page1}/',
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-origin',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
-            'X-Requested-With': 'XMLHttpRequest',
-            'sec-ch-ua': '"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
+    def get_total_pages(self):
+        """
+        This is to get the total pages
+        """
+        params = {
+            'page': self.page1,
         }
+        rurl = f"https://www.salvagereseller.com/cars-for-sale/sale-date/{self.today_date}"
+        response = self.session.get( rurl, headers=headers, params=params, cookies=cookies,timeout=10 )
+        soup = BeautifulSoup(response.content, "html.parser")
+        tag = soup.find('ul', class_="pagination")
+        a_tag = tag.find_all("a")[-1]
 
-    def create_output_folder(self):
+        total_cars = a_tag['href'].split("page=")[-1]
+        last_page = int(total_cars)//25
+        print(f"last_page = {last_page}")
+        return last_page
+
+    def scrape_urls(self, page_number):
         """
-        Creating a output folder to write the content
+        This function is used to pull all the urls from
+        the website and store in a list
         """
-        cwd = os.path.abspath(os.getcwd())
-        self.folder_name = os.path.join(cwd, 'Output_folder',
-                            datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
-        if not os.path.exists(self.folder_name):
-            os.makedirs(self.folder_name)
+        print('Starting scrape_urls method...')
+        params = {
+            'page': page_number,
+        }
+        headers['User-Agent'] = self.user_agent.random
+        rurl = f"https://www.salvagereseller.com/cars-for-sale/sale-date/{self.today_date}"
 
-    def scrape_urls(self):
-        "This function is used to pull all the urls from the website and store in a list"
-        print(self.scrape_urls.__doc__) # doc string tell about the functionlity
-        upd_page1 = self.page1
-        while True:
-            print('Starting scrape_urls method...')
-            headers = self.headers
-            print(headers['Referer'])
-            rurl = headers['Referer'].replace(str(upd_page1), str(self.page2))
-            print(rurl)
-            session = requests.Session()
-            response = session.get(
-                rurl,
+        response = self.session.get( rurl, headers=headers, timeout=10, params=params, cookies=cookies )
+        res = response.json()
+        lis = res['listing']
+        soup = BeautifulSoup(lis, 'html.parser')
+        href = soup.select('div.my-4.vehicle-row.position-relative a.vehicle-model')
+        if not href:
+            pass
+        for urls in href:
+            result = urls.get('href')
+            self.to_url.add(result)
+        self.page1 += 25
+        print(f"total_urls: {len(self.to_url)}")
 
-                headers=headers,
-                timeout=10  # this is used to wait till 10 seconds for server to respond, if it doesn't
-            )
-            res = response.json()
-            lis = res['listing']
-            soup = BeautifulSoup(lis, 'html.parser')
-            href = soup.select('div.my-4.vehicle-row.position-relative a.vehicle-model')
-            if not href:   # It is going to break the loop once there are no urls found
-                break
-            # print(href)
-            for hre in href:
-                result = hre.get('href')
-                self.cars_info(result)
-                # if result not in self.to_url:
-                #     print(self.count, result)
-                #     self.to_url.add(result)
-                #     self.count = self.count + 1
-            upd_page1 += 25
-            headers['Referer'] = f'https://www.salvagereseller.com/cars-for-sale/type/automobiles/page/{upd_page1}'
-            self.page2 += 25
-            if self.count >= 3000:
-                break
-        print(len(self.to_url))
 
     def cars_info(self, p_url):
-        "This function is used to get all the information from each url and store it in dictionary"
-        filename = f"{self.folder_name}/Salvage_reseller.csv"
-        print(self.cars_info.__doc__) # doc string tell about the functionality
+        """This function is used to get all the
+        information from each url and store it in dictionary"""
 
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
-        }
-        max_attempt = 3
-        retry_delay = 5  # Delay in seconds between retries
+        # max_attempt = 3
+        # retry_delay = 5  # Delay in seconds between retries
 
-        session = requests.Session()
-        retry = Retry(total=max_attempt, backoff_factor=0.5)
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount('http://', adapter)
-        session.mount('https://', adapter)
+        # session = requests.Session()
+        # retry = Retry(total=max_attempt, backoff_factor=0.5)
+        # adapter = HTTPAdapter(max_retries=retry)
+        # session.mount('http://', adapter)
+        # session.mount('https://', adapter)
 
-        for attempt in range(1, max_attempt + 1):
-            try:
-                resp = session.get(p_url, headers=headers, timeout=30)
-                resp.raise_for_status()  # Check for HTTP errors
+        resp = self.session.get(p_url, headers=headers, timeout=10)
+        resp.raise_for_status()  # Check for HTTP errors
 
-                # Process the response and break the loop if successful
-                break
-            except (requests.exceptions.Timeout, urllib3.exceptions.ReadTimeoutError
-                    ,requests.exceptions.ReadTimeout):
-                print(f"Timeout occurred. Retrying request ({attempt}/{max_attempt})...")
-                time.sleep(retry_delay)
-        else:
-            print("Maximum number of attempts reached. Unable to complete the request.")
         soup1 = BeautifulSoup(resp.content, 'html.parser')
         # try:
         #     div = soup1.find('div', text='Actual Cash Value:')
@@ -370,8 +342,13 @@ class Salvage:
 if __name__ == '__main__':
     t1 = time.time()
     obj = Salvage()
-    print(obj.__doc__) # it prints the functionality of the class using doc string
-    obj.create_output_folder()
-    obj.scrape_urls()
+    pages = obj.get_total_pages()
+
+    with ThreadPoolExecutor() as executor:
+        executor.map(obj.scrape_urls, range(1, pages+1))
+
+    with ThreadPoolExecutor() as executor:
+            executor.map(obj.cars_info, obj.to_url)
+
     print("Scrapped the urls")
     print(f'Time taken to scrape all {len(obj.to_url)} is : {time.time()-t1}s')
