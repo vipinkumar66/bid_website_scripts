@@ -58,26 +58,29 @@ class Salvage:
         This function is used to pull all the urls from
         the website and store in a list
         """
-        print('Starting scrape_urls method...')
-        params = {
-            'page': page_number,
-        }
-        headers['User-Agent'] = self.user_agent.random
-        rurl = f"https://www.salvagereseller.com/cars-for-sale/sale-date/{self.today_date}"
+        print(f'Scrapping page humber: {page_number}')
+        try:
+            params = {
+                'page': self.page1,
+            }
+            headers['User-Agent'] = self.user_agent.random
+            rurl = f"https://www.salvagereseller.com/cars-for-sale/sale-date/{self.today_date}"
 
-        response = self.session.get( rurl, headers=headers, timeout=10, params=params, cookies=cookies )
-        res = response.json()
-        lis = res['listing']
-        soup = BeautifulSoup(lis, 'html.parser')
-        href = soup.select('div.my-4.vehicle-row.position-relative a.vehicle-model')
-        if not href:
-            pass
-        for urls in href:
-            result = urls.get('href')
-            self.to_url.add(result)
-        self.page1 += 25
+            response = self.session.get( rurl, headers=headers, timeout=10, params=params, cookies=cookies )
+            res = response.json()
+            lis = res['listing']
+            soup = BeautifulSoup(lis, 'html.parser')
+            href = soup.select('div.my-4.vehicle-row.position-relative a.vehicle-model')
+            if not href:
+                print("no href")
+                pass
+            for urls in href:
+                result = urls.get('href')
+                self.to_url.add(result)
+            self.page1 += 25
+        except Exception as e:
+            print(f"exception is :{e}")
         print(f"total_urls: {len(self.to_url)}")
-
 
     def cars_info(self, p_url):
         """This function is used to get all the
