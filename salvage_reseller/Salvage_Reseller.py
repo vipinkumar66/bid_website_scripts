@@ -5,6 +5,7 @@ This module are used to scrapes the cars information from a website and saves it
 import os
 import datetime
 import time
+import sys
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -41,13 +42,17 @@ class Salvage:
         rurl = "https://www.salvagereseller.com/quick-pick/selling-today"
         response = self.session.get( rurl, headers=headers, params=params, cookies=cookies,timeout=10 )
         soup = BeautifulSoup(response.content, "html.parser")
-        tag = soup.find('ul', class_="pagination")
-        a_tag = tag.find_all("a")[-1]
+        try:
+            tag = soup.find('ul', class_="pagination")
+            a_tag = tag.find_all("a")[-1]
 
-        total_cars = a_tag['href'].split("page=")[-1]
-        last_page = int(total_cars)//25
-        print(f"last_page = {last_page}")
-        return last_page
+            total_cars = a_tag['href'].split("page=")[-1]
+            last_page = int(total_cars)//25
+            print(f"last_page = {last_page}")
+            return last_page
+        except AttributeError:
+            print("Sorry no cars available for sale today.")
+            sys.exit()
 
 
     def scrape_urls(self, page_number):
