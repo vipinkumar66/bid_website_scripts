@@ -299,7 +299,7 @@ if __name__ == "__main__":
 
     with ThreadPoolExecutor() as executor:
         executor.map(sca_scrapper.get_all_vehicle_links,
-                     range(2, 4))
+                     range(2, sca_scrapper.max_page+1))
 
     print(len(sca_scrapper.all_links))
     with ThreadPoolExecutor() as executor:
