@@ -1,3 +1,7 @@
+import datetime
+
+today = datetime.datetime.today()
+formatted_date = today.strftime("%m-%d-%Y")
 
 cookies = {
     '_gcl_au': '1.1.2057298493.1684690920',
@@ -37,8 +41,8 @@ headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
         }
 params = {
-    'saleDateFrom': '07/03/2023',
-    'saleDateTo': '07/05/2023',
+    'saleDateFrom': formatted_date,
+    'saleDateTo': formatted_date,
     'sort': 'sale_date',
     'page': '1',
     'isLocationPage': '0',
