@@ -1,4 +1,14 @@
 import datetime
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(SCRIPT_DIR)
+
+cwd = os.path.abspath(os.getcwd())
+folder_name = os.path.join(cwd, 'Output_folder',
+                        datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
+if not os.path.exists(folder_name):
+    os.makedirs(folder_name)
 
 today = datetime.datetime.today()
 formatted_date = today.strftime("%m-%d-%Y")

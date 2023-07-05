@@ -8,7 +8,7 @@ from fake_useragent import UserAgent
 from concurrent.futures import ThreadPoolExecutor
 
 from constants import (headers, params,vehicle_headers,
-                       cookies)
+                       cookies, folder_name)
 
 class ScaAuctionScrapper:
     """
@@ -18,8 +18,7 @@ class ScaAuctionScrapper:
         """
         Initializing function
         """
-        SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-        os.chdir(SCRIPT_DIR)
+
         self.session = requests.Session()
         self.all_links = set()
         self.max_page = 0
@@ -145,7 +144,7 @@ class ScaAuctionScrapper:
         fieldnames = overall_data.keys()
 
         try:
-            with open(csv_file, "a", newline="") as file:
+            with open(f"{folder_name}/csv_file", "a", newline="") as file:
                 writer = csv.DictWriter(file, fieldnames=fieldnames)
                 is_empty = os.stat(csv_file).st_size == 0
                 if is_empty:
@@ -187,9 +186,9 @@ class ScaAuctionScrapper:
         """
         sales_info = {
             "item":"", "sale_title_state": "", "sale_date": "", "sale_time": "", "day_of_week": "",
-             "last_updated_time":""
+             "last_updated_time":"",
         }
-
+        # panel-info-v2__desc panel-info-v2__desc--price
         item = main_soup.find("h1", id="lotLabel").text.strip()
         sales_info["item"] = item
 
@@ -282,15 +281,9 @@ class ScaAuctionScrapper:
         This is to get the bid info
         """
         current_bid = ""
-        current_bid_div = bid_soup.find("div", class_="panel-info-v2__item--current-bid")
-        try:
-            current_bid = current_bid_div.select("panel-info-v2__desc panel-info-v2__desc--price.lot-bid-price").text.strip()
-            print(f"current bid {current_bid}")
-        except Exception as e:
-            pass
+        current_bid = bid_soup.find("div", class_="panel-info-v2__desc panel-info-v2__desc--price").text
+        print(f"current_bid:{current_bid}")
         return current_bid
-
-        pass
 
 
 if __name__ == "__main__":

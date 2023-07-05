@@ -13,8 +13,6 @@ if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 filename = f"{folder_name}/Salvage_reseller.csv"
 
-import requests
-
 cookies = {
     '_gcl_au': '1.1.1937931851.1685254497',
     '_fbp': 'fb.1.1685254497004.459514322',
