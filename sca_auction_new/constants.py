@@ -6,7 +6,7 @@ os.chdir(SCRIPT_DIR)
 
 cwd = os.path.abspath(os.getcwd())
 folder_name = os.path.join(cwd, 'Output_folder',
-                        datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
+                        datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
 if not os.path.exists(folder_name):
     os.makedirs(folder_name)
 
