@@ -343,4 +343,4 @@ if __name__ == '__main__':
         executor.map(obj.cars_info, obj.all_url)
 
     print("Scrapped the urls")
-    print(f'Time taken to scrape all {len(obj.to_url)} is : {time.time()-t1}s')
+    print(f'Time taken to scrape all {len(obj.all_url)} is : {time.time()-t1}s')
